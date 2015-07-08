@@ -8750,7 +8750,8 @@ buffers (used for recording or preview,<wbr/> generally) need edge enhancement a
 reasonable preview quality.<wbr/></p>
 <p>This mode is guaranteed to be supported by devices that support either the
 YUV_<wbr/>REPROCESSING or PRIVATE_<wbr/>REPROCESSING capabilities
-(<a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a> lists either of those capabilities).<wbr/></p></span>
+(<a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a> lists either of those capabilities) and it will
+be the default mode for CAMERA3_<wbr/>TEMPLATE_<wbr/>ZERO_<wbr/>SHUTTER_<wbr/>LAG template.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -8934,7 +8935,9 @@ device.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Full-capability camera devices must always support OFF; all devices will list FAST.<wbr/></p>
+              <p>Full-capability camera devices must always support OFF; camera devices that support
+YUV_<wbr/>REPROCESSING or PRIVATE_<wbr/>REPROCESSING will list ZERO_<wbr/>SHUTTER_<wbr/>LAG; all devices will
+list FAST.<wbr/></p>
             </td>
           </tr>
 
@@ -9029,7 +9032,8 @@ buffers (used for recording or preview,<wbr/> generally) need edge enhancement a
 reasonable preview quality.<wbr/></p>
 <p>This mode is guaranteed to be supported by devices that support either the
 YUV_<wbr/>REPROCESSING or PRIVATE_<wbr/>REPROCESSING capabilities
-(<a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a> lists either of those capabilities).<wbr/></p></span>
+(<a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a> lists either of those capabilities) and it will
+be the default mode for CAMERA3_<wbr/>TEMPLATE_<wbr/>ZERO_<wbr/>SHUTTER_<wbr/>LAG template.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -13484,7 +13488,8 @@ low-resolution buffers (used for recording or preview,<wbr/> generally) need noi
 applied for reasonable preview quality.<wbr/></p>
 <p>This mode is guaranteed to be supported by devices that support either the
 YUV_<wbr/>REPROCESSING or PRIVATE_<wbr/>REPROCESSING capabilities
-(<a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a> lists either of those capabilities).<wbr/></p></span>
+(<a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a> lists either of those capabilities) and it will
+be the default mode for CAMERA3_<wbr/>TEMPLATE_<wbr/>ZERO_<wbr/>SHUTTER_<wbr/>LAG template.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -13675,6 +13680,8 @@ by this camera device.<wbr/></p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>Full-capability camera devices will always support OFF and FAST.<wbr/></p>
+<p>Camera devices that support YUV_<wbr/>REPROCESSING or PRIVATE_<wbr/>REPROCESSING will support
+ZERO_<wbr/>SHUTTER_<wbr/>LAG.<wbr/></p>
 <p>Legacy-capability camera devices will only support FAST mode.<wbr/></p>
             </td>
           </tr>
@@ -13778,7 +13785,8 @@ low-resolution buffers (used for recording or preview,<wbr/> generally) need noi
 applied for reasonable preview quality.<wbr/></p>
 <p>This mode is guaranteed to be supported by devices that support either the
 YUV_<wbr/>REPROCESSING or PRIVATE_<wbr/>REPROCESSING capabilities
-(<a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a> lists either of those capabilities).<wbr/></p></span>
+(<a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a> lists either of those capabilities) and it will
+be the default mode for CAMERA3_<wbr/>TEMPLATE_<wbr/>ZERO_<wbr/>SHUTTER_<wbr/>LAG template.<wbr/></p></span>
                   </li>
                 </ul>
 
