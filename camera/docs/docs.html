@@ -17376,7 +17376,7 @@ configurations based on the hardware level
 <tbody>
 <tr>
 <td align="center"><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#JPEG">ImageFormat#JPEG</a></td>
-<td align="center"><a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a></td>
+<td align="center"><a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a> (*1)</td>
 <td align="center">Any</td>
 <td align="center"></td>
 </tr>
@@ -17388,7 +17388,7 @@ configurations based on the hardware level
 </tr>
 <tr>
 <td align="center"><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#JPEG">ImageFormat#JPEG</a></td>
-<td align="center">1280x720 (720)</td>
+<td align="center">1280x720 (720p)</td>
 <td align="center">Any</td>
 <td align="center">if 720p &lt;= activeArraySize</td>
 </tr>
@@ -17426,6 +17426,22 @@ configurations based on the hardware level
 </table>
 <p>Refer to <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a> and <a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice.html#createCaptureSession">CameraDevice#createCaptureSession</a> for additional mandatory
 stream configurations on a per-capability basis.<wbr/></p>
+<p>*1: For JPEG format,<wbr/> the sizes may be restricted by below conditions:</p>
+<ul>
+<li>The HAL may choose the aspect ratio of each Jpeg size to be one of well known ones
+(e.<wbr/>g.<wbr/> 4:3,<wbr/> 16:9,<wbr/> 3:2 etc.<wbr/>).<wbr/> If the sensor maximum resolution
+(defined by <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>) has an aspect ratio other than these,<wbr/>
+it does not have to be included in the supported JPEG sizes.<wbr/></li>
+<li>Some hardware JPEG encoders may have pixel boundary alignment requirements,<wbr/> such as
+the dimensions being a multiple of 16.<wbr/>
+Therefore,<wbr/> the maximum JPEG size may be smaller than sensor maximum resolution.<wbr/>
+However,<wbr/> the largest JPEG size will be as close as possible to the sensor maximum
+resolution given above constraints.<wbr/> It is required that after aspect ratio adjustments,<wbr/>
+additional size reduction due to other issues must be less than 3% in area.<wbr/> For example,<wbr/>
+if the sensor maximum resolution is 3280x2464,<wbr/> if the maximum JPEG size has aspect
+ratio 4:3,<wbr/> and the JPEG encoder alignment requirement is 16,<wbr/> the maximum JPEG size will be
+3264x2448.<wbr/></li>
+</ul>
             </td>
           </tr>
 
