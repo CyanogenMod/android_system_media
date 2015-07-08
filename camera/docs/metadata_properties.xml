@@ -2739,7 +2739,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
             This mode is guaranteed to be supported by devices that support either the
             YUV_REPROCESSING or PRIVATE_REPROCESSING capabilities
-            (android.request.availableCapabilities lists either of those capabilities).
+            (android.request.availableCapabilities lists either of those capabilities) and it will
+            be the default mode for CAMERA3_TEMPLATE_ZERO_SHUTTER_LAG template.
             </notes></value>
           </enum>
           <description>Operation mode for edge
@@ -2795,7 +2796,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </description>
           <range>Any value listed in android.edge.mode</range>
           <details>
-          Full-capability camera devices must always support OFF; all devices will list FAST.
+          Full-capability camera devices must always support OFF; camera devices that support
+          YUV_REPROCESSING or PRIVATE_REPROCESSING will list ZERO_SHUTTER_LAG; all devices will
+          list FAST.
           </details>
           <hal_details>
           HAL must support both FAST and HIGH_QUALITY if edge enhancement control is available
@@ -3912,7 +3915,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
             This mode is guaranteed to be supported by devices that support either the
             YUV_REPROCESSING or PRIVATE_REPROCESSING capabilities
-            (android.request.availableCapabilities lists either of those capabilities).
+            (android.request.availableCapabilities lists either of those capabilities) and it will
+            be the default mode for CAMERA3_TEMPLATE_ZERO_SHUTTER_LAG template.
             </notes></value>
           </enum>
           <description>Mode of operation for the noise reduction algorithm.</description>
@@ -3976,6 +3980,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <range>Any value listed in android.noiseReduction.mode</range>
           <details>
           Full-capability camera devices will always support OFF and FAST.
+
+          Camera devices that support YUV_REPROCESSING or PRIVATE_REPROCESSING will support
+          ZERO_SHUTTER_LAG.
 
           Legacy-capability camera devices will only support FAST mode.
           </details>
