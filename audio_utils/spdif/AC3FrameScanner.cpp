@@ -126,6 +126,12 @@ void AC3FrameScanner::resetBurst()
     }
 }
 
+// Per IEC 61973-3:5.3.3, for E-AC3 burst-length shall be in bytes.
+uint16_t AC3FrameScanner::convertBytesToLengthCode(uint16_t numBytes) const
+{
+    return (mDataType == SPDIF_DATA_TYPE_E_AC3) ? numBytes : numBytes * 8;
+}
+
 // per IEC 61973-3 Paragraph 5.3.3
 // We have to send 6 audio blocks on all active substreams.
 // Substream zero must be the first.
@@ -204,7 +210,10 @@ bool AC3FrameScanner::parseHeader()
         // Keep track of how many audio blocks we have for each substream.
         // This should be safe because mSubstreamID is ANDed with 0x07 above.
         // And the array is allocated as [8].
-        mSubstreamBlockCounts[mSubstreamID] += mAudioBlocksPerSyncFrame;
+        if ((mStreamType == AC3_STREAM_TYPE_0)
+                || (mStreamType == AC3_STREAM_TYPE_2)) {
+            mSubstreamBlockCounts[mSubstreamID] += mAudioBlocksPerSyncFrame;
+        }
 
         // Print enough so we can see all the substreams.
         ALOGD_IF((mFormatDumpCount < 3*8 ),

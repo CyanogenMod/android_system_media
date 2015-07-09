@@ -175,9 +175,9 @@ void SPDIFEncoder::flushBurstBuffer()
 {
     const int preambleSize = 4 * sizeof(uint16_t);
     if (mByteCursor > preambleSize) {
-        // Set number of bits for valid payload before zeroPad.
-        uint16_t lengthCode = (mByteCursor - preambleSize) * 8;
-        mBurstBuffer[3] = lengthCode;
+        // Set lengthCode for valid payload before zeroPad.
+        uint16_t numBytes = (mByteCursor - preambleSize);
+        mBurstBuffer[3] = mFramer->convertBytesToLengthCode(numBytes);
 
         sendZeroPad();
         writeOutput(mBurstBuffer, mByteCursor);

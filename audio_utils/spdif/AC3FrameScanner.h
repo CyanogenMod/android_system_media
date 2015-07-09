@@ -47,6 +47,8 @@ public:
     virtual bool isLastInBurst();
     virtual void resetBurst();
 
+    virtual uint16_t convertBytesToLengthCode(uint16_t numBytes) const;
+
 protected:
     // Keep track of how many of each substream blocks have been accumulated.
     // We need all of each substream before sending block data burst.
