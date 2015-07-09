@@ -97,6 +97,11 @@ public:
      */
     virtual bool isLastInBurst()  = 0;
 
+    /**
+     * Most compression types use a lengthCode expressed in bits.
+     */
+    virtual uint16_t convertBytesToLengthCode(uint16_t numBytes) const { return numBytes * 8; }
+
 protected:
     uint32_t  mBytesSkipped;     // how many bytes were skipped looking for the start of a frame
     const uint8_t *mSyncBytes;   // pointer to the sync word specific to a format
