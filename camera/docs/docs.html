@@ -3852,9 +3852,8 @@ barcode value.<wbr/></p></span>
                     <span class="entry_type_enum_name">HIGH_SPEED_VIDEO</span>
                     <span class="entry_type_enum_deprecated">[deprecated]</span>
                     <span class="entry_type_enum_optional">[optional]</span>
-                    <span class="entry_type_enum_notes"><p>This is deprecated,<wbr/> please use
-<a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice.html#createConstrainedHighSpeedCaptureSession">CameraDevice#createConstrainedHighSpeedCaptureSession</a>
-and <a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice.html#createConstrainedHighSpeedRequestList">CameraDevice#createConstrainedHighSpeedRequestList</a>
+                    <span class="entry_type_enum_notes"><p>This is deprecated,<wbr/> please use <a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice.html#createConstrainedHighSpeedCaptureSession">CameraDevice#createConstrainedHighSpeedCaptureSession</a>
+and <a href="https://developer.android.com/reference/android/hardware/camera2/CameraConstrainedHighSpeedCaptureSession.html#createHighSpeedRequestList">CameraConstrainedHighSpeedCaptureSession#createHighSpeedRequestList</a>
 for high speed video recording.<wbr/></p>
 <p>Optimized for high speed video recording (frame rate &gt;=60fps) use case.<wbr/></p>
 <p>The supported high speed video sizes and fps ranges are specified in
@@ -5155,7 +5154,7 @@ controls are same for all the frames in this batch.<wbr/> Max batch size indicat
 the max possible number of frames the camera device will group together for this high
 speed stream configuration.<wbr/> This max batch size will be used to generate a high speed
 recording request list by
-<a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice.html#createConstrainedHighSpeedRequestList">CameraDevice#createConstrainedHighSpeedRequestList</a>.<wbr/>
+<a href="https://developer.android.com/reference/android/hardware/camera2/CameraConstrainedHighSpeedCaptureSession.html#createHighSpeedRequestList">CameraConstrainedHighSpeedCaptureSession#createHighSpeedRequestList</a>.<wbr/>
 The max batch size for each configuration will satisfy below conditions:</p>
 <ul>
 <li>Each max batch size will be a divisor of its corresponding fps_<wbr/>max /<wbr/> 30.<wbr/> For example,<wbr/>
@@ -8323,9 +8322,8 @@ barcode value.<wbr/></p></span>
                     <span class="entry_type_enum_name">HIGH_SPEED_VIDEO</span>
                     <span class="entry_type_enum_deprecated">[deprecated]</span>
                     <span class="entry_type_enum_optional">[optional]</span>
-                    <span class="entry_type_enum_notes"><p>This is deprecated,<wbr/> please use
-<a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice.html#createConstrainedHighSpeedCaptureSession">CameraDevice#createConstrainedHighSpeedCaptureSession</a>
-and <a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice.html#createConstrainedHighSpeedRequestList">CameraDevice#createConstrainedHighSpeedRequestList</a>
+                    <span class="entry_type_enum_notes"><p>This is deprecated,<wbr/> please use <a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice.html#createConstrainedHighSpeedCaptureSession">CameraDevice#createConstrainedHighSpeedCaptureSession</a>
+and <a href="https://developer.android.com/reference/android/hardware/camera2/CameraConstrainedHighSpeedCaptureSession.html#createHighSpeedRequestList">CameraConstrainedHighSpeedCaptureSession#createHighSpeedRequestList</a>
 for high speed video recording.<wbr/></p>
 <p>Optimized for high speed video recording (frame rate &gt;=60fps) use case.<wbr/></p>
 <p>The supported high speed video sizes and fps ranges are specified in
@@ -15449,8 +15447,8 @@ rate,<wbr/> including depth stall time.<wbr/></p></span>
                     <span class="entry_type_enum_notes"><p>The device supports constrained high speed video recording (frame rate &gt;=120fps)
 use case.<wbr/> The camera device will support high speed capture session created by
 <a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice.html#createConstrainedHighSpeedCaptureSession">CameraDevice#createConstrainedHighSpeedCaptureSession</a>,<wbr/> which
-only accepts high speed request list created by
-<a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice.html#createConstrainedHighSpeedRequestList">CameraDevice#createConstrainedHighSpeedRequestList</a>.<wbr/></p>
+only accepts high speed request lists created by
+<a href="https://developer.android.com/reference/android/hardware/camera2/CameraConstrainedHighSpeedCaptureSession.html#createHighSpeedRequestList">CameraConstrainedHighSpeedCaptureSession#createHighSpeedRequestList</a>.<wbr/></p>
 <p>A camera device can still support high speed video streaming by advertising the high speed
 FPS ranges in <a href="#static_android.control.aeAvailableTargetFpsRanges">android.<wbr/>control.<wbr/>ae<wbr/>Available<wbr/>Target<wbr/>Fps<wbr/>Ranges</a>.<wbr/> For this case,<wbr/> all normal
 capture request per frame control and synchronization requirements will apply to
@@ -15511,9 +15509,9 @@ recording surface(either from <a href="https://developer.android.com/reference/a
 <li>The FPS ranges are selected from
 <a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getHighSpeedVideoFpsRanges">StreamConfigurationMap#getHighSpeedVideoFpsRanges</a>.<wbr/></li>
 </ul>
-<p>When above conditions are NOT satistied,<wbr/> the
+<p>When above conditions are NOT satistied,<wbr/>
 <a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice.html#createConstrainedHighSpeedCaptureSession">CameraDevice#createConstrainedHighSpeedCaptureSession</a>
-and <a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice.html#createConstrainedHighSpeedRequestList">CameraDevice#createConstrainedHighSpeedRequestList</a> will fail.<wbr/></p>
+will fail.<wbr/></p>
 <p>Switching to a FPS range that has different maximum FPS may trigger some camera device
 reconfigurations,<wbr/> which may introduce extra latency.<wbr/> It is recommended that
 the application avoids unnecessary maximum target FPS changes as much as possible
