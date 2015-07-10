@@ -1420,7 +1420,7 @@ static inline char *audio_device_address_to_parameter(audio_devices_t device, co
 static inline bool audio_device_is_digital(audio_devices_t device) {
     if ((device & AUDIO_DEVICE_BIT_IN) != 0) {
         // input
-        return (device & (AUDIO_DEVICE_IN_ALL_USB |
+        return (~AUDIO_DEVICE_BIT_IN & device & (AUDIO_DEVICE_IN_ALL_USB |
                           AUDIO_DEVICE_IN_HDMI |
                           AUDIO_DEVICE_IN_SPDIF |
                           AUDIO_DEVICE_IN_IP)) != 0;
