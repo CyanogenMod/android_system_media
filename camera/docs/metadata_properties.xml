@@ -1601,9 +1601,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             </value>
             <value deprecated="true" optional="true">HIGH_SPEED_VIDEO
               <notes>
-              This is deprecated, please use
-              {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedCaptureSession}
-              and {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedRequestList}
+              This is deprecated, please use {@link
+              android.hardware.camera2.CameraDevice#createConstrainedHighSpeedCaptureSession}
+              and {@link
+              android.hardware.camera2.CameraConstrainedHighSpeedCaptureSession#createHighSpeedRequestList}
               for high speed video recording.
 
               Optimized for high speed video recording (frame rate >=60fps) use case.
@@ -2604,7 +2605,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           the max possible number of frames the camera device will group together for this high
           speed stream configuration. This max batch size will be used to generate a high speed
           recording request list by
-          {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedRequestList}.
+          {@link android.hardware.camera2.CameraConstrainedHighSpeedCaptureSession#createHighSpeedRequestList}.
           The max batch size for each configuration will satisfy below conditions:
 
           * Each max batch size will be a divisor of its corresponding fps_max / 30. For example,
@@ -4729,8 +4730,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               The device supports constrained high speed video recording (frame rate >=120fps)
               use case. The camera device will support high speed capture session created by
               {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedCaptureSession}, which
-              only accepts high speed request list created by
-              {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedRequestList}.
+              only accepts high speed request lists created by
+              {@link android.hardware.camera2.CameraConstrainedHighSpeedCaptureSession#createHighSpeedRequestList}.
 
               A camera device can still support high speed video streaming by advertising the high speed
               FPS ranges in android.control.aeAvailableTargetFpsRanges. For this case, all normal
@@ -4795,9 +4796,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               * The FPS ranges are selected from
               {@link android.hardware.camera2.params.StreamConfigurationMap#getHighSpeedVideoFpsRanges}.
 
-              When above conditions are NOT satistied, the
+              When above conditions are NOT satistied,
               {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedCaptureSession}
-              and {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedRequestList} will fail.
+              will fail.
 
               Switching to a FPS range that has different maximum FPS may trigger some camera device
               reconfigurations, which may introduce extra latency. It is recommended that
