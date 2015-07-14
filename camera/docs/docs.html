@@ -8722,8 +8722,9 @@ processing.<wbr/></p>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FAST</span>
-                    <span class="entry_type_enum_notes"><p>Apply edge enhancement at a quality level that does not slow down frame rate relative to sensor
-output</p></span>
+                    <span class="entry_type_enum_notes"><p>Apply edge enhancement at a quality level that does not slow down frame rate
+relative to sensor output.<wbr/> It may be the same as OFF if edge enhancement will
+slow down frame rate relative to sensor.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
@@ -8786,8 +8787,9 @@ no enhancement will be applied by the camera device.<wbr/></p>
 will be applied.<wbr/> HIGH_<wbr/>QUALITY mode indicates that the
 camera device will use the highest-quality enhancement algorithms,<wbr/>
 even if it slows down capture rate.<wbr/> FAST means the camera device will
-not slow down capture rate when applying edge enhancement.<wbr/> Every output stream will
-have a similar amount of enhancement applied.<wbr/></p>
+not slow down capture rate when applying edge enhancement.<wbr/> FAST may be the same as OFF if
+edge enhancement will slow down capture rate.<wbr/> Every output stream will have a similar
+amount of enhancement applied.<wbr/></p>
 <p>ZERO_<wbr/>SHUTTER_<wbr/>LAG is meant to be used by applications that maintain a continuous circular
 buffer of high-resolution images during preview and reprocess image(s) from that buffer
 into a final capture when triggered by the user.<wbr/> In this mode,<wbr/> the camera device applies
@@ -8796,7 +8798,7 @@ maximize preview quality,<wbr/> but does not apply edge enhancement to high-reso
 since those will be reprocessed later if necessary.<wbr/></p>
 <p>For YUV_<wbr/>REPROCESSING,<wbr/> these FAST/<wbr/>HIGH_<wbr/>QUALITY modes both mean that the camera
 device will apply FAST/<wbr/>HIGH_<wbr/>QUALITY YUV-domain edge enhancement,<wbr/> respectively.<wbr/>
-The camera device may adjust its internal noise reduction parameters for best
+The camera device may adjust its internal edge enhancement parameters for best
 image quality based on the <a href="#controls_android.reprocess.effectiveExposureFactor">android.<wbr/>reprocess.<wbr/>effective<wbr/>Exposure<wbr/>Factor</a>,<wbr/> if it is set.<wbr/></p>
             </td>
           </tr>
@@ -9004,8 +9006,9 @@ capture rate,<wbr/> then FAST and HIGH_<wbr/>QUALITY will generate the same outp
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FAST</span>
-                    <span class="entry_type_enum_notes"><p>Apply edge enhancement at a quality level that does not slow down frame rate relative to sensor
-output</p></span>
+                    <span class="entry_type_enum_notes"><p>Apply edge enhancement at a quality level that does not slow down frame rate
+relative to sensor output.<wbr/> It may be the same as OFF if edge enhancement will
+slow down frame rate relative to sensor.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
@@ -9068,8 +9071,9 @@ no enhancement will be applied by the camera device.<wbr/></p>
 will be applied.<wbr/> HIGH_<wbr/>QUALITY mode indicates that the
 camera device will use the highest-quality enhancement algorithms,<wbr/>
 even if it slows down capture rate.<wbr/> FAST means the camera device will
-not slow down capture rate when applying edge enhancement.<wbr/> Every output stream will
-have a similar amount of enhancement applied.<wbr/></p>
+not slow down capture rate when applying edge enhancement.<wbr/> FAST may be the same as OFF if
+edge enhancement will slow down capture rate.<wbr/> Every output stream will have a similar
+amount of enhancement applied.<wbr/></p>
 <p>ZERO_<wbr/>SHUTTER_<wbr/>LAG is meant to be used by applications that maintain a continuous circular
 buffer of high-resolution images during preview and reprocess image(s) from that buffer
 into a final capture when triggered by the user.<wbr/> In this mode,<wbr/> the camera device applies
@@ -9078,7 +9082,7 @@ maximize preview quality,<wbr/> but does not apply edge enhancement to high-reso
 since those will be reprocessed later if necessary.<wbr/></p>
 <p>For YUV_<wbr/>REPROCESSING,<wbr/> these FAST/<wbr/>HIGH_<wbr/>QUALITY modes both mean that the camera
 device will apply FAST/<wbr/>HIGH_<wbr/>QUALITY YUV-domain edge enhancement,<wbr/> respectively.<wbr/>
-The camera device may adjust its internal noise reduction parameters for best
+The camera device may adjust its internal edge enhancement parameters for best
 image quality based on the <a href="#controls_android.reprocess.effectiveExposureFactor">android.<wbr/>reprocess.<wbr/>effective<wbr/>Exposure<wbr/>Factor</a>,<wbr/> if it is set.<wbr/></p>
             </td>
           </tr>
@@ -13453,7 +13457,8 @@ is therefore no larger than <code>|<wbr/>r|<wbr/> &lt;= sqrt(2)</code>.<wbr/></p
                   <li>
                     <span class="entry_type_enum_name">FAST</span>
                     <span class="entry_type_enum_notes"><p>Noise reduction is applied without reducing frame rate relative to sensor
-output.<wbr/></p></span>
+output.<wbr/> It may be the same as OFF if noise reduction will reduce frame rate
+relative to sensor.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
@@ -13529,8 +13534,9 @@ This mode is optional,<wbr/> may not be support by all devices.<wbr/> The applic
 will be applied.<wbr/> HIGH_<wbr/>QUALITY mode indicates that the camera device
 will use the highest-quality noise filtering algorithms,<wbr/>
 even if it slows down capture rate.<wbr/> FAST means the camera device will not
-slow down capture rate when applying noise filtering.<wbr/> Every output stream will
-have a similar amount of enhancement applied.<wbr/></p>
+slow down capture rate when applying noise filtering.<wbr/> FAST may be the same as MINIMAL if
+MINIMAL is listed,<wbr/> or the same as OFF if any noise filtering will slow down capture rate.<wbr/>
+Every output stream will have a similar amount of enhancement applied.<wbr/></p>
 <p>ZERO_<wbr/>SHUTTER_<wbr/>LAG is meant to be used by applications that maintain a continuous circular
 buffer of high-resolution images during preview and reprocess image(s) from that buffer
 into a final capture when triggered by the user.<wbr/> In this mode,<wbr/> the camera device applies
@@ -13750,7 +13756,8 @@ capture rate,<wbr/> then FAST and HIGH_<wbr/>QUALITY will generate the same outp
                   <li>
                     <span class="entry_type_enum_name">FAST</span>
                     <span class="entry_type_enum_notes"><p>Noise reduction is applied without reducing frame rate relative to sensor
-output.<wbr/></p></span>
+output.<wbr/> It may be the same as OFF if noise reduction will reduce frame rate
+relative to sensor.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
@@ -13826,8 +13833,9 @@ This mode is optional,<wbr/> may not be support by all devices.<wbr/> The applic
 will be applied.<wbr/> HIGH_<wbr/>QUALITY mode indicates that the camera device
 will use the highest-quality noise filtering algorithms,<wbr/>
 even if it slows down capture rate.<wbr/> FAST means the camera device will not
-slow down capture rate when applying noise filtering.<wbr/> Every output stream will
-have a similar amount of enhancement applied.<wbr/></p>
+slow down capture rate when applying noise filtering.<wbr/> FAST may be the same as MINIMAL if
+MINIMAL is listed,<wbr/> or the same as OFF if any noise filtering will slow down capture rate.<wbr/>
+Every output stream will have a similar amount of enhancement applied.<wbr/></p>
 <p>ZERO_<wbr/>SHUTTER_<wbr/>LAG is meant to be used by applications that maintain a continuous circular
 buffer of high-resolution images during preview and reprocess image(s) from that buffer
 into a final capture when triggered by the user.<wbr/> In this mode,<wbr/> the camera device applies

@@ -2715,8 +2715,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <value>OFF
             <notes>No edge enhancement is applied.</notes></value>
             <value>FAST
-            <notes>Apply edge enhancement at a quality level that does not slow down frame rate relative to sensor
-            output</notes></value>
+            <notes>Apply edge enhancement at a quality level that does not slow down frame rate
+            relative to sensor output. It may be the same as OFF if edge enhancement will
+            slow down frame rate relative to sensor.</notes></value>
             <value>HIGH_QUALITY
             <notes>Apply high-quality edge enhancement, at a cost of possibly reduced output frame rate.
             </notes></value>
@@ -2754,8 +2755,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           will be applied. HIGH_QUALITY mode indicates that the
           camera device will use the highest-quality enhancement algorithms,
           even if it slows down capture rate. FAST means the camera device will
-          not slow down capture rate when applying edge enhancement. Every output stream will
-          have a similar amount of enhancement applied.
+          not slow down capture rate when applying edge enhancement. FAST may be the same as OFF if
+          edge enhancement will slow down capture rate. Every output stream will have a similar
+          amount of enhancement applied.
 
           ZERO_SHUTTER_LAG is meant to be used by applications that maintain a continuous circular
           buffer of high-resolution images during preview and reprocess image(s) from that buffer
@@ -2766,7 +2768,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           For YUV_REPROCESSING, these FAST/HIGH_QUALITY modes both mean that the camera
           device will apply FAST/HIGH_QUALITY YUV-domain edge enhancement, respectively.
-          The camera device may adjust its internal noise reduction parameters for best
+          The camera device may adjust its internal edge enhancement parameters for best
           image quality based on the android.reprocess.effectiveExposureFactor, if it is set.
           </details>
           <hal_details>
@@ -3887,7 +3889,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <notes>No noise reduction is applied.</notes></value>
             <value>FAST
             <notes>Noise reduction is applied without reducing frame rate relative to sensor
-            output.</notes></value>
+            output. It may be the same as OFF if noise reduction will reduce frame rate
+            relative to sensor.</notes></value>
             <value>HIGH_QUALITY
             <notes>High-quality noise reduction is applied, at the cost of possibly reduced frame
             rate relative to sensor output.</notes></value>
@@ -3937,8 +3940,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           will be applied. HIGH_QUALITY mode indicates that the camera device
           will use the highest-quality noise filtering algorithms,
           even if it slows down capture rate. FAST means the camera device will not
-          slow down capture rate when applying noise filtering. Every output stream will
-          have a similar amount of enhancement applied.
+          slow down capture rate when applying noise filtering. FAST may be the same as MINIMAL if
+          MINIMAL is listed, or the same as OFF if any noise filtering will slow down capture rate.
+          Every output stream will have a similar amount of enhancement applied.
 
           ZERO_SHUTTER_LAG is meant to be used by applications that maintain a continuous circular
           buffer of high-resolution images during preview and reprocess image(s) from that buffer
