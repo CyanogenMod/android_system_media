@@ -5652,9 +5652,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           Format                                             | Size                                         | Hardware Level | Notes
           :-------------------------------------------------:|:--------------------------------------------:|:--------------:|:--------------:
-          {@link android.graphics.ImageFormat#JPEG}          | android.sensor.info.activeArraySize          | Any            |
+          {@link android.graphics.ImageFormat#JPEG}          | android.sensor.info.activeArraySize (*1)     | Any            |
           {@link android.graphics.ImageFormat#JPEG}          | 1920x1080 (1080p)                            | Any            | if 1080p &lt;= activeArraySize
-          {@link android.graphics.ImageFormat#JPEG}          | 1280x720 (720)                               | Any            | if 720p &lt;= activeArraySize
+          {@link android.graphics.ImageFormat#JPEG}          | 1280x720 (720p)                               | Any            | if 720p &lt;= activeArraySize
           {@link android.graphics.ImageFormat#JPEG}          | 640x480 (480p)                               | Any            | if 480p &lt;= activeArraySize
           {@link android.graphics.ImageFormat#JPEG}          | 320x240 (240p)                               | Any            | if 240p &lt;= activeArraySize
           {@link android.graphics.ImageFormat#YUV_420_888}   | all output sizes available for JPEG          | FULL           |
@@ -5664,6 +5664,22 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           Refer to android.request.availableCapabilities and {@link
           android.hardware.camera2.CameraDevice#createCaptureSession} for additional mandatory
           stream configurations on a per-capability basis.
+
+          *1: For JPEG format, the sizes may be restricted by below conditions:
+
+          * The HAL may choose the aspect ratio of each Jpeg size to be one of well known ones
+          (e.g. 4:3, 16:9, 3:2 etc.). If the sensor maximum resolution
+          (defined by android.sensor.info.activeArraySize) has an aspect ratio other than these,
+          it does not have to be included in the supported JPEG sizes.
+          * Some hardware JPEG encoders may have pixel boundary alignment requirements, such as
+          the dimensions being a multiple of 16.
+          Therefore, the maximum JPEG size may be smaller than sensor maximum resolution.
+          However, the largest JPEG size will be as close as possible to the sensor maximum
+          resolution given above constraints. It is required that after aspect ratio adjustments,
+          additional size reduction due to other issues must be less than 3% in area. For example,
+          if the sensor maximum resolution is 3280x2464, if the maximum JPEG size has aspect
+          ratio 4:3, and the JPEG encoder alignment requirement is 16, the maximum JPEG size will be
+          3264x2448.
           </details>
           <hal_details>
           Do not set this property directly
