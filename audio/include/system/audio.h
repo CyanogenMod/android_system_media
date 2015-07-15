@@ -756,6 +756,8 @@ typedef enum {
 
     AUDIO_OUTPUT_FLAG_IEC958_NONAUDIO = 0x400, // Audio stream contains compressed audio in
                                                // SPDIF data bursts, not PCM.
+    AUDIO_OUTPUT_FLAG_VOIP_RX = 0x800,  // use this flag in combination with DIRECT to
+                                         // start voip over voice path.
 } audio_output_flags_t;
 
 /* The audio input flags are analogous to audio output flags.
