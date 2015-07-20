@@ -316,6 +316,7 @@ typedef enum {
     AUDIO_FORMAT_DTS_HD              = 0x0C000000UL,
     // IEC61937 is encoded audio wrapped in 16-bit PCM.
     AUDIO_FORMAT_IEC61937            = 0x0D000000UL,
+    AUDIO_FORMAT_FLAC                = 0x1D000000UL,
     AUDIO_FORMAT_MAIN_MASK           = 0xFF000000UL, /* Deprecated. Use audio_get_main_format() */
     AUDIO_FORMAT_SUB_MASK            = 0x00FFFFFFUL,
 
