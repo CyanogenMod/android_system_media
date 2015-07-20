@@ -254,6 +254,7 @@ typedef enum {
     AUDIO_FORMAT_AMR_NB              = 0x02000000UL,
     AUDIO_FORMAT_AMR_WB              = 0x03000000UL,
     AUDIO_FORMAT_AAC                 = 0x04000000UL,
+    AUDIO_FORMAT_PCM_OFFLOAD         = 0x1C000000UL,
     AUDIO_FORMAT_HE_AAC_V1           = 0x05000000UL, /* Deprecated, Use AUDIO_FORMAT_AAC_HE_V1*/
     AUDIO_FORMAT_HE_AAC_V2           = 0x06000000UL, /* Deprecated, Use AUDIO_FORMAT_AAC_HE_V2*/
     AUDIO_FORMAT_VORBIS              = 0x07000000UL,
@@ -301,6 +302,11 @@ typedef enum {
                                         AUDIO_FORMAT_AAC_SUB_HE_V2),
     AUDIO_FORMAT_AAC_ELD             = (AUDIO_FORMAT_AAC |
                                         AUDIO_FORMAT_AAC_SUB_ELD),
+    /*Offload PCM formats*/
+    AUDIO_FORMAT_PCM_16_BIT_OFFLOAD  = (AUDIO_FORMAT_PCM_OFFLOAD |
+                                        AUDIO_FORMAT_PCM_SUB_16_BIT),
+    AUDIO_FORMAT_PCM_24_BIT_OFFLOAD  = (AUDIO_FORMAT_PCM_OFFLOAD |
+                                        AUDIO_FORMAT_PCM_SUB_8_24_BIT),
 } audio_format_t;
 
 /* For the channel mask for position assignment representation */
@@ -1371,6 +1377,12 @@ static inline bool audio_is_valid_format(audio_format_t format)
     case AUDIO_FORMAT_DTS:
     case AUDIO_FORMAT_DTS_HD:
         return true;
+    case AUDIO_FORMAT_PCM_OFFLOAD:
+        if (format != AUDIO_FORMAT_PCM_16_BIT_OFFLOAD &&
+                format != AUDIO_FORMAT_PCM_24_BIT_OFFLOAD) {
+            return false;
+        }
+        return true;
     default:
         return false;
     }
@@ -1388,12 +1400,14 @@ static inline size_t audio_bytes_per_sample(audio_format_t format)
     switch (format) {
     case AUDIO_FORMAT_PCM_32_BIT:
     case AUDIO_FORMAT_PCM_8_24_BIT:
+    case AUDIO_FORMAT_PCM_24_BIT_OFFLOAD:
         size = sizeof(int32_t);
         break;
     case AUDIO_FORMAT_PCM_24_BIT_PACKED:
         size = sizeof(uint8_t) * 3;
         break;
     case AUDIO_FORMAT_PCM_16_BIT:
+    case AUDIO_FORMAT_PCM_16_BIT_OFFLOAD:
         size = sizeof(int16_t);
         break;
     case AUDIO_FORMAT_PCM_8_BIT:
