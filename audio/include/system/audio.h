@@ -263,7 +263,11 @@ typedef enum {
     AUDIO_FORMAT_E_AC3               = 0x0A000000UL,
     AUDIO_FORMAT_DTS                 = 0x0B000000UL,
     AUDIO_FORMAT_DTS_HD              = 0x0C000000UL,
+    AUDIO_FORMAT_WMA                 = 0x13000000UL,
+    AUDIO_FORMAT_WMA_PRO             = 0x14000000UL,
     AUDIO_FORMAT_FLAC                = 0x1D000000UL,
+    AUDIO_FORMAT_ALAC                = 0x1F000000UL,
+    AUDIO_FORMAT_APE                 = 0x20000000UL,
     AUDIO_FORMAT_MAIN_MASK           = 0xFF000000UL,
     AUDIO_FORMAT_SUB_MASK            = 0x00FFFFFFUL,
 
@@ -784,6 +788,7 @@ typedef struct {
     int64_t duration_us;                // duration in microseconds, -1 if unknown
     bool has_video;                     // true if stream is tied to a video stream
     bool is_streaming;                  // true if streaming, false if local playback
+    uint32_t bit_width;
 } audio_offload_info_t;
 
 #define AUDIO_MAKE_OFFLOAD_INFO_VERSION(maj,min) \
@@ -1377,6 +1382,10 @@ static inline bool audio_is_valid_format(audio_format_t format)
     case AUDIO_FORMAT_DTS:
     case AUDIO_FORMAT_DTS_HD:
     case AUDIO_FORMAT_FLAC:
+    case AUDIO_FORMAT_ALAC:
+    case AUDIO_FORMAT_APE:
+    case AUDIO_FORMAT_WMA:
+    case AUDIO_FORMAT_WMA_PRO:
         return true;
     case AUDIO_FORMAT_PCM_OFFLOAD:
         if (format != AUDIO_FORMAT_PCM_16_BIT_OFFLOAD &&
