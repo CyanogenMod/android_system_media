@@ -44,14 +44,6 @@ static const char * const format_string_map[] = {
     "AUDIO_FORMAT_PCM_24_BIT_PACKED"/* "PCM_FORMAT_S24_3LE" */
 };
 
-static const unsigned const format_byte_size_map[] = {
-    2, /* PCM_FORMAT_S16_LE */
-    4, /* PCM_FORMAT_S32_LE */
-    1, /* PCM_FORMAT_S8 */
-    4, /* PCM_FORMAT_S24_LE */
-    3, /* PCM_FORMAT_S24_3LE */
-};
-
 extern int8_t const pcm_format_value_map[50];
 
 /* Sort these in terms of preference (best first).
