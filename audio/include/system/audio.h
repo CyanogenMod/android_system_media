@@ -739,6 +739,8 @@ typedef enum {
     AUDIO_OUTPUT_FLAG_RAW = 0x100,         // minimize signal processing
     AUDIO_OUTPUT_FLAG_SYNC = 0x200,        // synchronize I/O streams
 
+    AUDIO_OUTPUT_FLAG_IEC958_NONAUDIO = 0x400, // Audio stream contains compressed audio in
+                                               // SPDIF data bursts, not PCM.
 } audio_output_flags_t;
 
 /* The audio input flags are analogous to audio output flags.
