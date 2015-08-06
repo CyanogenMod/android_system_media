@@ -254,7 +254,6 @@ typedef enum {
     AUDIO_FORMAT_AMR_NB              = 0x02000000UL,
     AUDIO_FORMAT_AMR_WB              = 0x03000000UL,
     AUDIO_FORMAT_AAC                 = 0x04000000UL,
-    AUDIO_FORMAT_PCM_OFFLOAD         = 0x1C000000UL,
     AUDIO_FORMAT_HE_AAC_V1           = 0x05000000UL, /* Deprecated, Use AUDIO_FORMAT_AAC_HE_V1*/
     AUDIO_FORMAT_HE_AAC_V2           = 0x06000000UL, /* Deprecated, Use AUDIO_FORMAT_AAC_HE_V2*/
     AUDIO_FORMAT_VORBIS              = 0x07000000UL,
@@ -263,11 +262,20 @@ typedef enum {
     AUDIO_FORMAT_E_AC3               = 0x0A000000UL,
     AUDIO_FORMAT_DTS                 = 0x0B000000UL,
     AUDIO_FORMAT_DTS_HD              = 0x0C000000UL,
-    AUDIO_FORMAT_WMA                 = 0x13000000UL,
-    AUDIO_FORMAT_WMA_PRO             = 0x14000000UL,
-    AUDIO_FORMAT_FLAC                = 0x1D000000UL,
-    AUDIO_FORMAT_ALAC                = 0x1F000000UL,
-    AUDIO_FORMAT_APE                 = 0x20000000UL,
+    AUDIO_FORMAT_EVRC                = 0x10000000UL,
+    AUDIO_FORMAT_QCELP               = 0x11000000UL,
+    AUDIO_FORMAT_WMA                 = 0x12000000UL,
+    AUDIO_FORMAT_WMA_PRO             = 0x13000000UL,
+    AUDIO_FORMAT_AAC_ADIF            = 0x14000000UL,
+    AUDIO_FORMAT_EVRCB               = 0x15000000UL,
+    AUDIO_FORMAT_EVRCWB              = 0x16000000UL,
+    AUDIO_FORMAT_AMR_WB_PLUS         = 0x17000000UL,
+    AUDIO_FORMAT_MP2                 = 0x18000000UL,
+    AUDIO_FORMAT_EVRCNW              = 0x19000000UL,
+    AUDIO_FORMAT_PCM_OFFLOAD         = 0x1A000000UL,
+    AUDIO_FORMAT_FLAC                = 0x1B000000UL,
+    AUDIO_FORMAT_ALAC                = 0x1C000000UL,
+    AUDIO_FORMAT_APE                 = 0x1D000000UL,
     AUDIO_FORMAT_MAIN_MASK           = 0xFF000000UL,
     AUDIO_FORMAT_SUB_MASK            = 0x00FFFFFFUL,
 
@@ -351,6 +359,9 @@ enum {
     AUDIO_CHANNEL_OUT_MONO     = AUDIO_CHANNEL_OUT_FRONT_LEFT,
     AUDIO_CHANNEL_OUT_STEREO   = (AUDIO_CHANNEL_OUT_FRONT_LEFT |
                                   AUDIO_CHANNEL_OUT_FRONT_RIGHT),
+    AUDIO_CHANNEL_OUT_2POINT1  = (AUDIO_CHANNEL_OUT_FRONT_LEFT |
+                                  AUDIO_CHANNEL_OUT_FRONT_RIGHT |
+                                  AUDIO_CHANNEL_OUT_FRONT_CENTER),
     AUDIO_CHANNEL_OUT_QUAD     = (AUDIO_CHANNEL_OUT_FRONT_LEFT |
                                   AUDIO_CHANNEL_OUT_FRONT_RIGHT |
                                   AUDIO_CHANNEL_OUT_BACK_LEFT |
@@ -361,6 +372,12 @@ enum {
                                   AUDIO_CHANNEL_OUT_FRONT_RIGHT |
                                   AUDIO_CHANNEL_OUT_SIDE_LEFT |
                                   AUDIO_CHANNEL_OUT_SIDE_RIGHT),
+    AUDIO_CHANNEL_OUT_SURROUND = (AUDIO_CHANNEL_OUT_FRONT_LEFT |
+                                  AUDIO_CHANNEL_OUT_FRONT_RIGHT |
+                                  AUDIO_CHANNEL_OUT_FRONT_CENTER |
+                                  AUDIO_CHANNEL_OUT_BACK_CENTER),
+    AUDIO_CHANNEL_OUT_PENTA =    (AUDIO_CHANNEL_OUT_QUAD |
+                                  AUDIO_CHANNEL_OUT_FRONT_CENTER),
     AUDIO_CHANNEL_OUT_5POINT1  = (AUDIO_CHANNEL_OUT_FRONT_LEFT |
                                   AUDIO_CHANNEL_OUT_FRONT_RIGHT |
                                   AUDIO_CHANNEL_OUT_FRONT_CENTER |
@@ -375,6 +392,13 @@ enum {
                                   AUDIO_CHANNEL_OUT_LOW_FREQUENCY |
                                   AUDIO_CHANNEL_OUT_SIDE_LEFT |
                                   AUDIO_CHANNEL_OUT_SIDE_RIGHT),
+    AUDIO_CHANNEL_OUT_6POINT1  = (AUDIO_CHANNEL_OUT_FRONT_LEFT |
+                                  AUDIO_CHANNEL_OUT_FRONT_RIGHT |
+                                  AUDIO_CHANNEL_OUT_FRONT_CENTER |
+                                  AUDIO_CHANNEL_OUT_LOW_FREQUENCY |
+                                  AUDIO_CHANNEL_OUT_BACK_LEFT |
+                                  AUDIO_CHANNEL_OUT_BACK_RIGHT |
+                                  AUDIO_CHANNEL_OUT_BACK_CENTER),
     // matches the correct AudioFormat.CHANNEL_OUT_7POINT1_SURROUND definition for 7.1
     AUDIO_CHANNEL_OUT_7POINT1  = (AUDIO_CHANNEL_OUT_FRONT_LEFT |
                                   AUDIO_CHANNEL_OUT_FRONT_RIGHT |
@@ -426,6 +450,15 @@ enum {
     AUDIO_CHANNEL_IN_MONO   = AUDIO_CHANNEL_IN_FRONT,
     AUDIO_CHANNEL_IN_STEREO = (AUDIO_CHANNEL_IN_LEFT | AUDIO_CHANNEL_IN_RIGHT),
     AUDIO_CHANNEL_IN_FRONT_BACK = (AUDIO_CHANNEL_IN_FRONT | AUDIO_CHANNEL_IN_BACK),
+    AUDIO_CHANNEL_IN_5POINT1 = (AUDIO_CHANNEL_IN_LEFT |
+                               AUDIO_CHANNEL_IN_RIGHT |
+                               AUDIO_CHANNEL_IN_FRONT |
+                               AUDIO_CHANNEL_IN_BACK |
+                               AUDIO_CHANNEL_IN_LEFT_PROCESSED |
+                               AUDIO_CHANNEL_IN_RIGHT_PROCESSED),
+    AUDIO_CHANNEL_IN_VOICE_UPLINK_MONO = (AUDIO_CHANNEL_IN_VOICE_UPLINK | AUDIO_CHANNEL_IN_MONO),
+    AUDIO_CHANNEL_IN_VOICE_DNLINK_MONO = (AUDIO_CHANNEL_IN_VOICE_DNLINK | AUDIO_CHANNEL_IN_MONO),
+    AUDIO_CHANNEL_IN_VOICE_CALL_MONO   = (AUDIO_CHANNEL_IN_VOICE_UPLINK_MONO | AUDIO_CHANNEL_IN_VOICE_DNLINK_MONO),
     AUDIO_CHANNEL_IN_ALL    = (AUDIO_CHANNEL_IN_LEFT |
                                AUDIO_CHANNEL_IN_RIGHT |
                                AUDIO_CHANNEL_IN_FRONT |
@@ -758,6 +791,8 @@ typedef enum {
                                                // SPDIF data bursts, not PCM.
     AUDIO_OUTPUT_FLAG_VOIP_RX = 0x800,  // use this flag in combination with DIRECT to
                                          // start voip over voice path.
+    // flag for HDMI compressed passthrough
+    AUDIO_OUTPUT_FLAG_COMPRESS_PASSTHROUGH = 0x800
 } audio_output_flags_t;
 
 /* The audio input flags are analogous to audio output flags.
@@ -809,7 +844,8 @@ static const audio_offload_info_t AUDIO_INFO_INITIALIZER = {
     bit_rate: 0,
     duration_us: 0,
     has_video: false,
-    is_streaming: false
+    is_streaming: false,
+    bit_width: 16,
 };
 
 /* common audio stream configuration parameters
@@ -1383,6 +1419,14 @@ static inline bool audio_is_valid_format(audio_format_t format)
     case AUDIO_FORMAT_E_AC3:
     case AUDIO_FORMAT_DTS:
     case AUDIO_FORMAT_DTS_HD:
+    case AUDIO_FORMAT_QCELP:
+    case AUDIO_FORMAT_EVRC:
+    case AUDIO_FORMAT_EVRCB:
+    case AUDIO_FORMAT_EVRCWB:
+    case AUDIO_FORMAT_AAC_ADIF:
+    case AUDIO_FORMAT_AMR_WB_PLUS:
+    case AUDIO_FORMAT_MP2:
+    case AUDIO_FORMAT_EVRCNW:
     case AUDIO_FORMAT_FLAC:
     case AUDIO_FORMAT_ALAC:
     case AUDIO_FORMAT_APE:
