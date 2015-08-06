@@ -316,6 +316,21 @@ typedef enum {
     AUDIO_FORMAT_DTS_HD              = 0x0C000000UL,
     // IEC61937 is encoded audio wrapped in 16-bit PCM.
     AUDIO_FORMAT_IEC61937            = 0x0D000000UL,
+    AUDIO_FORMAT_EVRC                = 0x10000000UL,
+    AUDIO_FORMAT_QCELP               = 0x11000000UL,
+    AUDIO_FORMAT_WMA                 = 0x12000000UL,
+    AUDIO_FORMAT_WMA_PRO             = 0x13000000UL,
+    AUDIO_FORMAT_AAC_ADIF            = 0x14000000UL,
+    AUDIO_FORMAT_EVRCB               = 0x15000000UL,
+    AUDIO_FORMAT_EVRCWB              = 0x16000000UL,
+    AUDIO_FORMAT_AMR_WB_PLUS         = 0x17000000UL,
+    AUDIO_FORMAT_MP2                 = 0x18000000UL,
+    AUDIO_FORMAT_EVRCNW              = 0x19000000UL,
+    AUDIO_FORMAT_PCM_OFFLOAD         = 0x1A000000UL,
+    AUDIO_FORMAT_FLAC                = 0x1B000000UL,
+    AUDIO_FORMAT_ALAC                = 0x1C000000UL,
+    AUDIO_FORMAT_APE                 = 0x1D000000UL,
+    AUDIO_FORMAT_AAC_ADTS            = 0x1E000000UL,
     AUDIO_FORMAT_MAIN_MASK           = 0xFF000000UL, /* Deprecated. Use audio_get_main_format() */
     AUDIO_FORMAT_SUB_MASK            = 0x00FFFFFFUL,
 
@@ -354,6 +369,31 @@ typedef enum {
                                         AUDIO_FORMAT_AAC_SUB_HE_V2),
     AUDIO_FORMAT_AAC_ELD             = (AUDIO_FORMAT_AAC |
                                         AUDIO_FORMAT_AAC_SUB_ELD),
+    AUDIO_FORMAT_AAC_ADTS_MAIN       = (AUDIO_FORMAT_AAC_ADTS |
+                                        AUDIO_FORMAT_AAC_SUB_MAIN),
+    AUDIO_FORMAT_AAC_ADTS_LC         = (AUDIO_FORMAT_AAC_ADTS |
+                                        AUDIO_FORMAT_AAC_SUB_LC),
+    AUDIO_FORMAT_AAC_ADTS_SSR        = (AUDIO_FORMAT_AAC_ADTS |
+                                        AUDIO_FORMAT_AAC_SUB_SSR),
+    AUDIO_FORMAT_AAC_ADTS_LTP        = (AUDIO_FORMAT_AAC_ADTS |
+                                        AUDIO_FORMAT_AAC_SUB_LTP),
+    AUDIO_FORMAT_AAC_ADTS_HE_V1      = (AUDIO_FORMAT_AAC_ADTS |
+                                        AUDIO_FORMAT_AAC_SUB_HE_V1),
+    AUDIO_FORMAT_AAC_ADTS_SCALABLE   = (AUDIO_FORMAT_AAC_ADTS |
+                                        AUDIO_FORMAT_AAC_SUB_SCALABLE),
+    AUDIO_FORMAT_AAC_ADTS_ERLC       = (AUDIO_FORMAT_AAC_ADTS |
+                                        AUDIO_FORMAT_AAC_SUB_ERLC),
+    AUDIO_FORMAT_AAC_ADTS_LD         = (AUDIO_FORMAT_AAC_ADTS |
+                                        AUDIO_FORMAT_AAC_SUB_LD),
+    AUDIO_FORMAT_AAC_ADTS_HE_V2      = (AUDIO_FORMAT_AAC_ADTS |
+                                        AUDIO_FORMAT_AAC_SUB_HE_V2),
+    AUDIO_FORMAT_AAC_ADTS_ELD        = (AUDIO_FORMAT_AAC_ADTS |
+                                        AUDIO_FORMAT_AAC_SUB_ELD),
+    /*Offload PCM formats*/
+    AUDIO_FORMAT_PCM_16_BIT_OFFLOAD  = (AUDIO_FORMAT_PCM_OFFLOAD |
+                                        AUDIO_FORMAT_PCM_SUB_16_BIT),
+    AUDIO_FORMAT_PCM_24_BIT_OFFLOAD  = (AUDIO_FORMAT_PCM_OFFLOAD |
+                                        AUDIO_FORMAT_PCM_SUB_8_24_BIT),
 } audio_format_t;
 
 /* For the channel mask for position assignment representation */
@@ -394,6 +434,9 @@ enum {
     AUDIO_CHANNEL_OUT_MONO     = AUDIO_CHANNEL_OUT_FRONT_LEFT,
     AUDIO_CHANNEL_OUT_STEREO   = (AUDIO_CHANNEL_OUT_FRONT_LEFT |
                                   AUDIO_CHANNEL_OUT_FRONT_RIGHT),
+    AUDIO_CHANNEL_OUT_2POINT1  = (AUDIO_CHANNEL_OUT_FRONT_LEFT |
+                                  AUDIO_CHANNEL_OUT_FRONT_RIGHT |
+                                  AUDIO_CHANNEL_OUT_FRONT_CENTER),
     AUDIO_CHANNEL_OUT_QUAD     = (AUDIO_CHANNEL_OUT_FRONT_LEFT |
                                   AUDIO_CHANNEL_OUT_FRONT_RIGHT |
                                   AUDIO_CHANNEL_OUT_BACK_LEFT |
@@ -404,6 +447,12 @@ enum {
                                   AUDIO_CHANNEL_OUT_FRONT_RIGHT |
                                   AUDIO_CHANNEL_OUT_SIDE_LEFT |
                                   AUDIO_CHANNEL_OUT_SIDE_RIGHT),
+    AUDIO_CHANNEL_OUT_SURROUND = (AUDIO_CHANNEL_OUT_FRONT_LEFT |
+                                  AUDIO_CHANNEL_OUT_FRONT_RIGHT |
+                                  AUDIO_CHANNEL_OUT_FRONT_CENTER |
+                                  AUDIO_CHANNEL_OUT_BACK_CENTER),
+    AUDIO_CHANNEL_OUT_PENTA =    (AUDIO_CHANNEL_OUT_QUAD |
+                                  AUDIO_CHANNEL_OUT_FRONT_CENTER),
     AUDIO_CHANNEL_OUT_5POINT1  = (AUDIO_CHANNEL_OUT_FRONT_LEFT |
                                   AUDIO_CHANNEL_OUT_FRONT_RIGHT |
                                   AUDIO_CHANNEL_OUT_FRONT_CENTER |
@@ -418,6 +467,13 @@ enum {
                                   AUDIO_CHANNEL_OUT_LOW_FREQUENCY |
                                   AUDIO_CHANNEL_OUT_SIDE_LEFT |
                                   AUDIO_CHANNEL_OUT_SIDE_RIGHT),
+    AUDIO_CHANNEL_OUT_6POINT1  = (AUDIO_CHANNEL_OUT_FRONT_LEFT |
+                                  AUDIO_CHANNEL_OUT_FRONT_RIGHT |
+                                  AUDIO_CHANNEL_OUT_FRONT_CENTER |
+                                  AUDIO_CHANNEL_OUT_LOW_FREQUENCY |
+                                  AUDIO_CHANNEL_OUT_BACK_LEFT |
+                                  AUDIO_CHANNEL_OUT_BACK_RIGHT |
+                                  AUDIO_CHANNEL_OUT_BACK_CENTER),
     // matches the correct AudioFormat.CHANNEL_OUT_7POINT1_SURROUND definition for 7.1
     AUDIO_CHANNEL_OUT_7POINT1  = (AUDIO_CHANNEL_OUT_FRONT_LEFT |
                                   AUDIO_CHANNEL_OUT_FRONT_RIGHT |
@@ -469,6 +525,15 @@ enum {
     AUDIO_CHANNEL_IN_MONO   = AUDIO_CHANNEL_IN_FRONT,
     AUDIO_CHANNEL_IN_STEREO = (AUDIO_CHANNEL_IN_LEFT | AUDIO_CHANNEL_IN_RIGHT),
     AUDIO_CHANNEL_IN_FRONT_BACK = (AUDIO_CHANNEL_IN_FRONT | AUDIO_CHANNEL_IN_BACK),
+    AUDIO_CHANNEL_IN_5POINT1 = (AUDIO_CHANNEL_IN_LEFT |
+                               AUDIO_CHANNEL_IN_RIGHT |
+                               AUDIO_CHANNEL_IN_FRONT |
+                               AUDIO_CHANNEL_IN_BACK |
+                               AUDIO_CHANNEL_IN_LEFT_PROCESSED |
+                               AUDIO_CHANNEL_IN_RIGHT_PROCESSED),
+    AUDIO_CHANNEL_IN_VOICE_UPLINK_MONO = (AUDIO_CHANNEL_IN_VOICE_UPLINK | AUDIO_CHANNEL_IN_MONO),
+    AUDIO_CHANNEL_IN_VOICE_DNLINK_MONO = (AUDIO_CHANNEL_IN_VOICE_DNLINK | AUDIO_CHANNEL_IN_MONO),
+    AUDIO_CHANNEL_IN_VOICE_CALL_MONO   = (AUDIO_CHANNEL_IN_VOICE_UPLINK_MONO | AUDIO_CHANNEL_IN_VOICE_DNLINK_MONO),
     AUDIO_CHANNEL_IN_ALL    = (AUDIO_CHANNEL_IN_LEFT |
                                AUDIO_CHANNEL_IN_RIGHT |
                                AUDIO_CHANNEL_IN_FRONT |
@@ -801,6 +866,10 @@ typedef enum {
 
     AUDIO_OUTPUT_FLAG_IEC958_NONAUDIO = 0x400, // Audio stream contains compressed audio in
                                                // SPDIF data bursts, not PCM.
+    AUDIO_OUTPUT_FLAG_VOIP_RX = 0x800,  // use this flag in combination with DIRECT to
+                                         // start voip over voice path.
+    AUDIO_OUTPUT_FLAG_COMPRESS_PASSTHROUGH = 0x1000, // flag for HDMI compressed passthrough
+    AUDIO_OUTPUT_FLAG_DIRECT_PCM = 0x2000, // flag for Direct PCM
 } audio_output_flags_t;
 
 /* The audio input flags are analogous to audio output flags.
@@ -833,6 +902,9 @@ typedef struct {
     int64_t duration_us;                // duration in microseconds, -1 if unknown
     bool has_video;                     // true if stream is tied to a video stream
     bool is_streaming;                  // true if streaming, false if local playback
+    uint32_t bit_width;
+    uint32_t offload_buffer_size;       // offload fragment size
+    audio_usage_t usage;
 } audio_offload_info_t;
 
 #define AUDIO_MAKE_OFFLOAD_INFO_VERSION(maj,min) \
@@ -851,7 +923,10 @@ static const audio_offload_info_t AUDIO_INFO_INITIALIZER = {
     bit_rate: 0,
     duration_us: 0,
     has_video: false,
-    is_streaming: false
+    is_streaming: false,
+    bit_width: 16,
+    offload_buffer_size: 0,
+    usage: AUDIO_USAGE_UNKNOWN,
 };
 
 /* common audio stream configuration parameters
@@ -1433,6 +1508,7 @@ static inline bool audio_is_valid_format(audio_format_t format)
     case AUDIO_FORMAT_AMR_NB:
     case AUDIO_FORMAT_AMR_WB:
     case AUDIO_FORMAT_AAC:
+    case AUDIO_FORMAT_AAC_ADTS:
     case AUDIO_FORMAT_HE_AAC_V1:
     case AUDIO_FORMAT_HE_AAC_V2:
     case AUDIO_FORMAT_VORBIS:
@@ -1442,6 +1518,25 @@ static inline bool audio_is_valid_format(audio_format_t format)
     case AUDIO_FORMAT_DTS:
     case AUDIO_FORMAT_DTS_HD:
     case AUDIO_FORMAT_IEC61937:
+    case AUDIO_FORMAT_QCELP:
+    case AUDIO_FORMAT_EVRC:
+    case AUDIO_FORMAT_EVRCB:
+    case AUDIO_FORMAT_EVRCWB:
+    case AUDIO_FORMAT_AAC_ADIF:
+    case AUDIO_FORMAT_AMR_WB_PLUS:
+    case AUDIO_FORMAT_MP2:
+    case AUDIO_FORMAT_EVRCNW:
+    case AUDIO_FORMAT_FLAC:
+    case AUDIO_FORMAT_ALAC:
+    case AUDIO_FORMAT_APE:
+    case AUDIO_FORMAT_WMA:
+    case AUDIO_FORMAT_WMA_PRO:
+        return true;
+    case AUDIO_FORMAT_PCM_OFFLOAD:
+        if (format != AUDIO_FORMAT_PCM_16_BIT_OFFLOAD &&
+                format != AUDIO_FORMAT_PCM_24_BIT_OFFLOAD) {
+            return false;
+        }
         return true;
     default:
         return false;
@@ -1488,6 +1583,7 @@ static inline size_t audio_bytes_per_sample(audio_format_t format)
     switch (format) {
     case AUDIO_FORMAT_PCM_32_BIT:
     case AUDIO_FORMAT_PCM_8_24_BIT:
+    case AUDIO_FORMAT_PCM_24_BIT_OFFLOAD:
         size = sizeof(int32_t);
         break;
     case AUDIO_FORMAT_PCM_24_BIT_PACKED:
@@ -1495,6 +1591,7 @@ static inline size_t audio_bytes_per_sample(audio_format_t format)
         break;
     case AUDIO_FORMAT_PCM_16_BIT:
     case AUDIO_FORMAT_IEC61937:
+    case AUDIO_FORMAT_PCM_16_BIT_OFFLOAD:
         size = sizeof(int16_t);
         break;
     case AUDIO_FORMAT_PCM_8_BIT:
