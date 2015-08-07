@@ -27,6 +27,9 @@ typedef struct {
     struct pcm_config alsa_config;
 
     struct pcm * pcm;
+
+    size_t frame_size;    /* valid after proxy_prepare(), the frame size in bytes */
+    uint64_t transferred; /* the total frames transferred, not cleared on standby */
 } alsa_device_proxy;
 
 void proxy_prepare(alsa_device_proxy * proxy, alsa_device_profile * profile,
@@ -40,10 +43,13 @@ unsigned int proxy_get_period_size(const alsa_device_proxy * proxy);
 
 unsigned proxy_get_latency(const alsa_device_proxy * proxy);
 
+int proxy_get_presentation_position(const alsa_device_proxy * proxy,
+        uint64_t *frames, struct timespec *timestamp);
+
 int proxy_open(alsa_device_proxy * proxy);
 void proxy_close(alsa_device_proxy * proxy);
 
-int proxy_write(const alsa_device_proxy * proxy, const void *data, unsigned int count);
+int proxy_write(alsa_device_proxy * proxy, const void *data, unsigned int count);
 int proxy_read(const alsa_device_proxy * proxy, void *data, unsigned int count);
 
 #endif /* ANDROID_SYSTEM_MEDIA_ALSA_UTILS_ALSA_DEVICE_PROXY_H */

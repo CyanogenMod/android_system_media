@@ -29,6 +29,16 @@
 #define DEFAULT_PERIOD_SIZE     1024
 #define DEFAULT_PERIOD_COUNT    2
 
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+
+static const unsigned format_byte_size_map[] = {
+    2, /* PCM_FORMAT_S16_LE */
+    4, /* PCM_FORMAT_S32_LE */
+    1, /* PCM_FORMAT_S8 */
+    4, /* PCM_FORMAT_S24_LE */
+    3, /* PCM_FORMAT_S24_3LE */
+};
+
 void proxy_prepare(alsa_device_proxy * proxy, alsa_device_profile* profile,
                    struct pcm_config * config)
 {
@@ -62,6 +72,12 @@ void proxy_prepare(alsa_device_proxy * proxy, alsa_device_profile* profile,
     }
 
     proxy->pcm = NULL;
+    // config format should be checked earlier against profile.
+    if (config->format >= 0 && (size_t)config->format < ARRAY_SIZE(format_byte_size_map)) {
+        proxy->frame_size = format_byte_size_map[config->format] * proxy->alsa_config.channels;
+    } else {
+        proxy->frame_size = 1;
+    }
 }
 
 int proxy_open(alsa_device_proxy * proxy)
@@ -74,7 +90,8 @@ int proxy_open(alsa_device_proxy * proxy)
         return -EINVAL;
     }
 
-    proxy->pcm = pcm_open(profile->card, profile->device, profile->direction, &proxy->alsa_config);
+    proxy->pcm = pcm_open(profile->card, profile->device,
+            profile->direction | PCM_MONOTONIC, &proxy->alsa_config);
     if (proxy->pcm == NULL) {
         return -ENOMEM;
     }
@@ -145,12 +162,41 @@ unsigned proxy_get_latency(const alsa_device_proxy * proxy)
                / proxy_get_sample_rate(proxy);
 }
 
+int proxy_get_presentation_position(const alsa_device_proxy * proxy,
+        uint64_t *frames, struct timespec *timestamp)
+{
+    int ret = -EPERM; // -1
+    unsigned int avail;
+    if (proxy->pcm != NULL
+            && pcm_get_htimestamp(proxy->pcm, &avail, timestamp) == 0) {
+        const size_t kernel_buffer_size =
+                proxy->alsa_config.period_size * proxy->alsa_config.period_count;
+        if (avail > kernel_buffer_size) {
+            ALOGE("available frames(%u) > buffer size(%zu)", avail, kernel_buffer_size);
+        } else {
+            int64_t signed_frames = proxy->transferred - kernel_buffer_size + avail;
+            // It is possible to compensate for additional driver and device delay
+            // by changing signed_frames.  Example:
+            // signed_frames -= 20 /* ms */ * proxy->alsa_config.rate / 1000;
+            if (signed_frames >= 0) {
+                *frames = signed_frames;
+                ret = 0;
+            }
+        }
+    }
+    return ret;
+}
+
 /*
  * I/O
  */
-int proxy_write(const alsa_device_proxy * proxy, const void *data, unsigned int count)
+int proxy_write(alsa_device_proxy * proxy, const void *data, unsigned int count)
 {
-    return pcm_write(proxy->pcm, data, count);
+    int ret = pcm_write(proxy->pcm, data, count);
+    if (ret == 0) {
+        proxy->transferred += count / proxy->frame_size;
+    }
+    return ret;
 }
 
 int proxy_read(const alsa_device_proxy * proxy, void *data, unsigned int count)
