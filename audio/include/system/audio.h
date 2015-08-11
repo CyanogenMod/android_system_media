@@ -846,6 +846,7 @@ typedef struct {
     bool has_video;                     // true if stream is tied to a video stream
     bool is_streaming;                  // true if streaming, false if local playback
     uint32_t bit_width;
+    uint32_t offload_buffer_size;       // offload fragment size
 } audio_offload_info_t;
 
 #define AUDIO_MAKE_OFFLOAD_INFO_VERSION(maj,min) \
@@ -866,6 +867,7 @@ static const audio_offload_info_t AUDIO_INFO_INITIALIZER = {
     has_video: false,
     is_streaming: false,
     bit_width: 16,
+    offload_buffer_size: 0,
 };
 
 /* common audio stream configuration parameters
