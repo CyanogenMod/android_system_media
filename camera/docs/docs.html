@@ -12263,7 +12263,7 @@ coordinate system.<wbr/></p>
 
             <td class="entry_units">
               
-            Quarternion coefficients
+            Quaternion coefficients
           
             </td>
 
@@ -12282,13 +12282,13 @@ coordinate system.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>The four coefficients that describe the quarternion
+              <p>The four coefficients that describe the quaternion
 rotation from the Android sensor coordinate system to a
 camera-aligned coordinate system where the X-axis is
 aligned with the long side of the image sensor,<wbr/> the Y-axis
 is aligned with the short side of the image sensor,<wbr/> and
 the Z-axis is aligned with the optical axis of the sensor.<wbr/></p>
-<p>To convert from the quarternion coefficients <code>(x,<wbr/>y,<wbr/>z,<wbr/>w)</code>
+<p>To convert from the quaternion coefficients <code>(x,<wbr/>y,<wbr/>z,<wbr/>w)</code>
 to the axis of rotation <code>(a_<wbr/>x,<wbr/> a_<wbr/>y,<wbr/> a_<wbr/>z)</code> and rotation
 amount <code>theta</code>,<wbr/> the following formulas can be used:</p>
 <pre><code> theta = 2 * acos(w)
@@ -12297,7 +12297,7 @@ a_<wbr/>y = y /<wbr/> sin(theta/<wbr/>2)
 a_<wbr/>z = z /<wbr/> sin(theta/<wbr/>2)
 </code></pre>
 <p>To create a 3x3 rotation matrix that applies the rotation
-defined by this quarternion,<wbr/> the following matrix can be
+defined by this quaternion,<wbr/> the following matrix can be
 used:</p>
 <pre><code>R = [ 1 - 2y^2 - 2z^2,<wbr/>       2xy - 2zw,<wbr/>       2xz + 2yw,<wbr/>
            2xy + 2zw,<wbr/> 1 - 2x^2 - 2z^2,<wbr/>       2yz - 2xw,<wbr/>
@@ -12373,13 +12373,13 @@ the main sensor along the +X axis (to the right from the
 user's perspective) will report <code>(0.<wbr/>03,<wbr/> 0,<wbr/> 0)</code>.<wbr/></p>
 <p>To transform a pixel coordinates between two cameras
 facing the same direction,<wbr/> first the source camera
-<a href="#dynamic_android.lens.radialDistortion">android.<wbr/>lens.<wbr/>radial<wbr/>Distortion</a> must be corrected for.<wbr/>  Then
-the source camera <a href="#dynamic_android.lens.intrinsicCalibration">android.<wbr/>lens.<wbr/>intrinsic<wbr/>Calibration</a> needs
+<a href="#static_android.lens.radialDistortion">android.<wbr/>lens.<wbr/>radial<wbr/>Distortion</a> must be corrected for.<wbr/>  Then
+the source camera <a href="#static_android.lens.intrinsicCalibration">android.<wbr/>lens.<wbr/>intrinsic<wbr/>Calibration</a> needs
 to be applied,<wbr/> followed by the <a href="#static_android.lens.poseRotation">android.<wbr/>lens.<wbr/>pose<wbr/>Rotation</a>
 of the source camera,<wbr/> the translation of the source camera
 relative to the destination camera,<wbr/> the
 <a href="#static_android.lens.poseRotation">android.<wbr/>lens.<wbr/>pose<wbr/>Rotation</a> of the destination camera,<wbr/> and
-finally the inverse of <a href="#dynamic_android.lens.intrinsicCalibration">android.<wbr/>lens.<wbr/>intrinsic<wbr/>Calibration</a>
+finally the inverse of <a href="#static_android.lens.intrinsicCalibration">android.<wbr/>lens.<wbr/>intrinsic<wbr/>Calibration</a>
 of the destination camera.<wbr/> This obtains a
 radial-distortion-free coordinate in the destination
 camera pixel coordinates.<wbr/></p>
@@ -12481,7 +12481,7 @@ point,<wbr/> <code>z_<wbr/>s = 1</code>,<wbr/> and <code>w_<wbr/>s</code> is a m
 where <code>(0,<wbr/>0)</code> is the top-left of the
 preCorrectionActiveArraySize rectangle.<wbr/> Once the pose and
 intrinsic calibration transforms have been applied to a
-world point,<wbr/> then the <a href="#dynamic_android.lens.radialDistortion">android.<wbr/>lens.<wbr/>radial<wbr/>Distortion</a>
+world point,<wbr/> then the <a href="#static_android.lens.radialDistortion">android.<wbr/>lens.<wbr/>radial<wbr/>Distortion</a>
 transform needs to be applied,<wbr/> and the result adjusted to
 be in the <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a> coordinate
 system (where <code>(0,<wbr/> 0)</code> is the top-left of the
@@ -12559,7 +12559,7 @@ corrected image at the coordinate <code>[x_<wbr/>i,<wbr/> y_<wbr/>i]</code>:</p>
 </code></pre>
 <p>The pixel coordinates are defined in a normalized
 coordinate system related to the
-<a href="#dynamic_android.lens.intrinsicCalibration">android.<wbr/>lens.<wbr/>intrinsic<wbr/>Calibration</a> calibration fields.<wbr/>
+<a href="#static_android.lens.intrinsicCalibration">android.<wbr/>lens.<wbr/>intrinsic<wbr/>Calibration</a> calibration fields.<wbr/>
 Both <code>[x_<wbr/>i,<wbr/> y_<wbr/>i]</code> and <code>[x_<wbr/>c,<wbr/> y_<wbr/>c]</code> have <code>(0,<wbr/>0)</code> at the
 lens optical center <code>[c_<wbr/>x,<wbr/> c_<wbr/>y]</code>.<wbr/> The maximum magnitudes
 of both x and y coordinates are normalized to be 1 at the
@@ -13088,7 +13088,7 @@ coordinate system.<wbr/></p>
 
             <td class="entry_units">
               
-            Quarternion coefficients
+            Quaternion coefficients
           
             </td>
 
@@ -13107,13 +13107,13 @@ coordinate system.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>The four coefficients that describe the quarternion
+              <p>The four coefficients that describe the quaternion
 rotation from the Android sensor coordinate system to a
 camera-aligned coordinate system where the X-axis is
 aligned with the long side of the image sensor,<wbr/> the Y-axis
 is aligned with the short side of the image sensor,<wbr/> and
 the Z-axis is aligned with the optical axis of the sensor.<wbr/></p>
-<p>To convert from the quarternion coefficients <code>(x,<wbr/>y,<wbr/>z,<wbr/>w)</code>
+<p>To convert from the quaternion coefficients <code>(x,<wbr/>y,<wbr/>z,<wbr/>w)</code>
 to the axis of rotation <code>(a_<wbr/>x,<wbr/> a_<wbr/>y,<wbr/> a_<wbr/>z)</code> and rotation
 amount <code>theta</code>,<wbr/> the following formulas can be used:</p>
 <pre><code> theta = 2 * acos(w)
@@ -13122,7 +13122,7 @@ a_<wbr/>y = y /<wbr/> sin(theta/<wbr/>2)
 a_<wbr/>z = z /<wbr/> sin(theta/<wbr/>2)
 </code></pre>
 <p>To create a 3x3 rotation matrix that applies the rotation
-defined by this quarternion,<wbr/> the following matrix can be
+defined by this quaternion,<wbr/> the following matrix can be
 used:</p>
 <pre><code>R = [ 1 - 2y^2 - 2z^2,<wbr/>       2xy - 2zw,<wbr/>       2xz + 2yw,<wbr/>
            2xy + 2zw,<wbr/> 1 - 2x^2 - 2z^2,<wbr/>       2yz - 2xw,<wbr/>
@@ -13198,13 +13198,13 @@ the main sensor along the +X axis (to the right from the
 user's perspective) will report <code>(0.<wbr/>03,<wbr/> 0,<wbr/> 0)</code>.<wbr/></p>
 <p>To transform a pixel coordinates between two cameras
 facing the same direction,<wbr/> first the source camera
-<a href="#dynamic_android.lens.radialDistortion">android.<wbr/>lens.<wbr/>radial<wbr/>Distortion</a> must be corrected for.<wbr/>  Then
-the source camera <a href="#dynamic_android.lens.intrinsicCalibration">android.<wbr/>lens.<wbr/>intrinsic<wbr/>Calibration</a> needs
+<a href="#static_android.lens.radialDistortion">android.<wbr/>lens.<wbr/>radial<wbr/>Distortion</a> must be corrected for.<wbr/>  Then
+the source camera <a href="#static_android.lens.intrinsicCalibration">android.<wbr/>lens.<wbr/>intrinsic<wbr/>Calibration</a> needs
 to be applied,<wbr/> followed by the <a href="#static_android.lens.poseRotation">android.<wbr/>lens.<wbr/>pose<wbr/>Rotation</a>
 of the source camera,<wbr/> the translation of the source camera
 relative to the destination camera,<wbr/> the
 <a href="#static_android.lens.poseRotation">android.<wbr/>lens.<wbr/>pose<wbr/>Rotation</a> of the destination camera,<wbr/> and
-finally the inverse of <a href="#dynamic_android.lens.intrinsicCalibration">android.<wbr/>lens.<wbr/>intrinsic<wbr/>Calibration</a>
+finally the inverse of <a href="#static_android.lens.intrinsicCalibration">android.<wbr/>lens.<wbr/>intrinsic<wbr/>Calibration</a>
 of the destination camera.<wbr/> This obtains a
 radial-distortion-free coordinate in the destination
 camera pixel coordinates.<wbr/></p>
@@ -13306,7 +13306,7 @@ point,<wbr/> <code>z_<wbr/>s = 1</code>,<wbr/> and <code>w_<wbr/>s</code> is a m
 where <code>(0,<wbr/>0)</code> is the top-left of the
 preCorrectionActiveArraySize rectangle.<wbr/> Once the pose and
 intrinsic calibration transforms have been applied to a
-world point,<wbr/> then the <a href="#dynamic_android.lens.radialDistortion">android.<wbr/>lens.<wbr/>radial<wbr/>Distortion</a>
+world point,<wbr/> then the <a href="#static_android.lens.radialDistortion">android.<wbr/>lens.<wbr/>radial<wbr/>Distortion</a>
 transform needs to be applied,<wbr/> and the result adjusted to
 be in the <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a> coordinate
 system (where <code>(0,<wbr/> 0)</code> is the top-left of the
@@ -13384,7 +13384,7 @@ corrected image at the coordinate <code>[x_<wbr/>i,<wbr/> y_<wbr/>i]</code>:</p>
 </code></pre>
 <p>The pixel coordinates are defined in a normalized
 coordinate system related to the
-<a href="#dynamic_android.lens.intrinsicCalibration">android.<wbr/>lens.<wbr/>intrinsic<wbr/>Calibration</a> calibration fields.<wbr/>
+<a href="#static_android.lens.intrinsicCalibration">android.<wbr/>lens.<wbr/>intrinsic<wbr/>Calibration</a> calibration fields.<wbr/>
 Both <code>[x_<wbr/>i,<wbr/> y_<wbr/>i]</code> and <code>[x_<wbr/>c,<wbr/> y_<wbr/>c]</code> have <code>(0,<wbr/>0)</code> at the
 lens optical center <code>[c_<wbr/>x,<wbr/> c_<wbr/>y]</code>.<wbr/> The maximum magnitudes
 of both x and y coordinates are normalized to be 1 at the
@@ -15431,8 +15431,8 @@ following:</p>
   <a href="https://developer.android.com/reference/android/hardware/camera2/CaptureResult.html">CaptureResult</a>:<ul>
 <li><a href="#static_android.lens.poseTranslation">android.<wbr/>lens.<wbr/>pose<wbr/>Translation</a></li>
 <li><a href="#static_android.lens.poseRotation">android.<wbr/>lens.<wbr/>pose<wbr/>Rotation</a></li>
-<li><a href="#dynamic_android.lens.intrinsicCalibration">android.<wbr/>lens.<wbr/>intrinsic<wbr/>Calibration</a></li>
-<li><a href="#dynamic_android.lens.radialDistortion">android.<wbr/>lens.<wbr/>radial<wbr/>Distortion</a></li>
+<li><a href="#static_android.lens.intrinsicCalibration">android.<wbr/>lens.<wbr/>intrinsic<wbr/>Calibration</a></li>
+<li><a href="#static_android.lens.radialDistortion">android.<wbr/>lens.<wbr/>radial<wbr/>Distortion</a></li>
 </ul>
 </li>
 <li>The <a href="#static_android.depth.depthIsExclusive">android.<wbr/>depth.<wbr/>depth<wbr/>Is<wbr/>Exclusive</a> entry is listed by this device.<wbr/></li>
@@ -19133,7 +19133,7 @@ relative to the top,<wbr/>left of post-processed YUV output buffer with dimensio
 <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/></p>
 <p>The currently supported fields that correct for geometric distortion are:</p>
 <ol>
-<li><a href="#dynamic_android.lens.radialDistortion">android.<wbr/>lens.<wbr/>radial<wbr/>Distortion</a>.<wbr/></li>
+<li><a href="#static_android.lens.radialDistortion">android.<wbr/>lens.<wbr/>radial<wbr/>Distortion</a>.<wbr/></li>
 </ol>
 <p>If all of the geometric distortion fields are no-ops,<wbr/> this rectangle will be the same
 as the post-distortion-corrected rectangle given in

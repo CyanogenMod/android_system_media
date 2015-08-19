@@ -3599,17 +3599,17 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             coordinate system.
           </description>
           <units>
-            Quarternion coefficients
+            Quaternion coefficients
           </units>
           <details>
-            The four coefficients that describe the quarternion
+            The four coefficients that describe the quaternion
             rotation from the Android sensor coordinate system to a
             camera-aligned coordinate system where the X-axis is
             aligned with the long side of the image sensor, the Y-axis
             is aligned with the short side of the image sensor, and
             the Z-axis is aligned with the optical axis of the sensor.
 
-            To convert from the quarternion coefficients `(x,y,z,w)`
+            To convert from the quaternion coefficients `(x,y,z,w)`
             to the axis of rotation `(a_x, a_y, a_z)` and rotation
             amount `theta`, the following formulas can be used:
 
@@ -3619,7 +3619,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
                 a_z = z / sin(theta/2)
 
             To create a 3x3 rotation matrix that applies the rotation
-            defined by this quarternion, the following matrix can be
+            defined by this quaternion, the following matrix can be
             used:
 
                 R = [ 1 - 2y^2 - 2z^2,       2xy - 2zw,       2xz + 2yw,
@@ -3759,10 +3759,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </clone>
         <clone entry="android.lens.poseTranslation" kind="static">
         </clone>
-        <clone entry="android.lens.intrinsicCalibration" kind="static">
-        </clone>
-        <clone entry="android.lens.radialDistortion" kind="static">
-        </clone>
       </dynamic>
       <static>
         <entry name="intrinsicCalibration" type="float" visibility="public"
@@ -3880,6 +3876,12 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="DEPTH" />
         </entry>
       </static>
+      <dynamic>
+        <clone entry="android.lens.intrinsicCalibration" kind="static">
+        </clone>
+        <clone entry="android.lens.radialDistortion" kind="static">
+        </clone>
+      </dynamic>
     </section>
     <section name="noiseReduction">
       <controls>
