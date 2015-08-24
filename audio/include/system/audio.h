@@ -276,6 +276,7 @@ typedef enum {
     AUDIO_FORMAT_FLAC                = 0x1B000000UL,
     AUDIO_FORMAT_ALAC                = 0x1C000000UL,
     AUDIO_FORMAT_APE                 = 0x1D000000UL,
+    AUDIO_FORMAT_AAC_ADTS            = 0x1E000000UL,
     AUDIO_FORMAT_MAIN_MASK           = 0xFF000000UL,
     AUDIO_FORMAT_SUB_MASK            = 0x00FFFFFFUL,
 
@@ -313,6 +314,26 @@ typedef enum {
     AUDIO_FORMAT_AAC_HE_V2           = (AUDIO_FORMAT_AAC |
                                         AUDIO_FORMAT_AAC_SUB_HE_V2),
     AUDIO_FORMAT_AAC_ELD             = (AUDIO_FORMAT_AAC |
+                                        AUDIO_FORMAT_AAC_SUB_ELD),
+    AUDIO_FORMAT_AAC_ADTS_MAIN       = (AUDIO_FORMAT_AAC_ADTS |
+                                        AUDIO_FORMAT_AAC_SUB_MAIN),
+    AUDIO_FORMAT_AAC_ADTS_LC         = (AUDIO_FORMAT_AAC_ADTS |
+                                        AUDIO_FORMAT_AAC_SUB_LC),
+    AUDIO_FORMAT_AAC_ADTS_SSR        = (AUDIO_FORMAT_AAC_ADTS |
+                                        AUDIO_FORMAT_AAC_SUB_SSR),
+    AUDIO_FORMAT_AAC_ADTS_LTP        = (AUDIO_FORMAT_AAC_ADTS |
+                                        AUDIO_FORMAT_AAC_SUB_LTP),
+    AUDIO_FORMAT_AAC_ADTS_HE_V1      = (AUDIO_FORMAT_AAC_ADTS |
+                                        AUDIO_FORMAT_AAC_SUB_HE_V1),
+    AUDIO_FORMAT_AAC_ADTS_SCALABLE   = (AUDIO_FORMAT_AAC_ADTS |
+                                        AUDIO_FORMAT_AAC_SUB_SCALABLE),
+    AUDIO_FORMAT_AAC_ADTS_ERLC       = (AUDIO_FORMAT_AAC_ADTS |
+                                        AUDIO_FORMAT_AAC_SUB_ERLC),
+    AUDIO_FORMAT_AAC_ADTS_LD         = (AUDIO_FORMAT_AAC_ADTS |
+                                        AUDIO_FORMAT_AAC_SUB_LD),
+    AUDIO_FORMAT_AAC_ADTS_HE_V2      = (AUDIO_FORMAT_AAC_ADTS |
+                                        AUDIO_FORMAT_AAC_SUB_HE_V2),
+    AUDIO_FORMAT_AAC_ADTS_ELD        = (AUDIO_FORMAT_AAC_ADTS |
                                         AUDIO_FORMAT_AAC_SUB_ELD),
     /*Offload PCM formats*/
     AUDIO_FORMAT_PCM_16_BIT_OFFLOAD  = (AUDIO_FORMAT_PCM_OFFLOAD |
@@ -1410,6 +1431,7 @@ static inline bool audio_is_valid_format(audio_format_t format)
     case AUDIO_FORMAT_AMR_NB:
     case AUDIO_FORMAT_AMR_WB:
     case AUDIO_FORMAT_AAC:
+    case AUDIO_FORMAT_AAC_ADTS:
     case AUDIO_FORMAT_HE_AAC_V1:
     case AUDIO_FORMAT_HE_AAC_V2:
     case AUDIO_FORMAT_VORBIS:
