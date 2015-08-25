@@ -791,8 +791,7 @@ typedef enum {
                                                // SPDIF data bursts, not PCM.
     AUDIO_OUTPUT_FLAG_VOIP_RX = 0x800,  // use this flag in combination with DIRECT to
                                          // start voip over voice path.
-    // flag for HDMI compressed passthrough
-    AUDIO_OUTPUT_FLAG_COMPRESS_PASSTHROUGH = 0x800
+    AUDIO_OUTPUT_FLAG_COMPRESS_PASSTHROUGH = 0x1000 // flag for HDMI compressed passthrough
 } audio_output_flags_t;
 
 /* The audio input flags are analogous to audio output flags.
