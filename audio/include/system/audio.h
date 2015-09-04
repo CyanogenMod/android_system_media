@@ -812,7 +812,8 @@ typedef enum {
                                                // SPDIF data bursts, not PCM.
     AUDIO_OUTPUT_FLAG_VOIP_RX = 0x800,  // use this flag in combination with DIRECT to
                                          // start voip over voice path.
-    AUDIO_OUTPUT_FLAG_COMPRESS_PASSTHROUGH = 0x1000 // flag for HDMI compressed passthrough
+    AUDIO_OUTPUT_FLAG_COMPRESS_PASSTHROUGH = 0x1000, // flag for HDMI compressed passthrough
+    AUDIO_OUTPUT_FLAG_DIRECT_PCM = 0x2000, // flag for Direct PCM
 } audio_output_flags_t;
 
 /* The audio input flags are analogous to audio output flags.
@@ -847,6 +848,7 @@ typedef struct {
     bool is_streaming;                  // true if streaming, false if local playback
     uint32_t bit_width;
     uint32_t offload_buffer_size;       // offload fragment size
+    audio_usage_t usage;
 } audio_offload_info_t;
 
 #define AUDIO_MAKE_OFFLOAD_INFO_VERSION(maj,min) \
@@ -868,6 +870,7 @@ static const audio_offload_info_t AUDIO_INFO_INITIALIZER = {
     is_streaming: false,
     bit_width: 16,
     offload_buffer_size: 0,
+    usage: AUDIO_USAGE_UNKNOWN,
 };
 
 /* common audio stream configuration parameters
