@@ -524,7 +524,7 @@ static int add_camera_metadata_entry_raw(camera_metadata_t *dst,
 
     if (dst == NULL) return ERROR;
     if (dst->entry_count == dst->entry_capacity) return ERROR;
-    if (data == NULL) return ERROR;
+    if (data_count && data == NULL) return ERROR;
 
     size_t data_bytes =
             calculate_camera_metadata_entry_data_size(type, data_count);
