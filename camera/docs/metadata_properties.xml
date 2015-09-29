@@ -1789,7 +1789,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Whether video stabilization is
           active.</description>
           <details>
-          Video stabilization automatically translates and scales images from
+          Video stabilization automatically warps images from
           the camera in order to stabilize motion between consecutive frames.
 
           If enabled, video stabilization can modify the
@@ -1801,6 +1801,16 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           the video stabilization modes in the first several capture results may
           still be "OFF", and it will become "ON" when the initialization is
           done.
+
+          In addition, not all recording sizes or frame rates may be supported for
+          stabilization by a device that reports stabilization support. It is guaranteed
+          that an output targeting a MediaRecorder or MediaCodec will be stabilized if
+          the recording resolution is less than or equal to 1920 x 1080 (width less than
+          or equal to 1920, height less than or equal to 1080), and the recording
+          frame rate is less than or equal to 30fps.  At other sizes, the CaptureResult
+          android.control.videoStabilizationMode field will return
+          OFF if the recording output is not stabilized, or if there are no output
+          Surface types that can be stabilized.
 
           If a camera device supports both this mode and OIS
           (android.lens.opticalStabilizationMode), turning both modes on may
