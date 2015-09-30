@@ -17,11 +17,11 @@
 // Test program for audio_utils FIFO library.
 // This only tests the single-threaded aspects, not the barriers.
 
-#include <audio_utils/fifo.h>
-#include <audio_utils/sndfile.h>
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
+#include <audio_utils/fifo.h>
+#include <audio_utils/sndfile.h>
 
 int main(int argc, char **argv)
 {
