@@ -21,9 +21,13 @@
 #include <stdlib.h>
 #include <sys/cdefs.h>
 
+/** \cond */
 __BEGIN_DECLS
+/** \endcond */
 
-/* The memcpy_* conversion routines are designed to work in-place on same dst as src
+/**
+ * \file primitives.h
+ * The memcpy_* conversion routines are designed to work in-place on same dst as src
  * buffers only if the types shrink on copy, with the exception of memcpy_to_i16_from_u8().
  * This allows the loops to go upwards for faster cache access (and may be more flexible
  * for future optimization later).
@@ -47,43 +51,51 @@ __BEGIN_DECLS
  */
 void ditherAndClamp(int32_t* out, const int32_t *sums, size_t c);
 
-/* Expand and copy samples from unsigned 8-bit offset by 0x80 to signed 16-bit.
- * Parameters:
- *  dst     Destination buffer
- *  src     Source buffer
- *  count   Number of samples to copy
+/**
+ * Expand and copy samples from unsigned 8-bit offset by 0x80 to signed 16-bit.
+ *
+ *  \param dst     Destination buffer
+ *  \param src     Source buffer
+ *  \param count   Number of samples to copy
+ *
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
 void memcpy_to_i16_from_u8(int16_t *dst, const uint8_t *src, size_t count);
 
-/* Shrink and copy samples from signed 16-bit to unsigned 8-bit offset by 0x80.
- * Parameters:
- *  dst     Destination buffer
- *  src     Source buffer
- *  count   Number of samples to copy
+/**
+ * Shrink and copy samples from signed 16-bit to unsigned 8-bit offset by 0x80.
+ *
+ *  \param dst     Destination buffer
+ *  \param src     Source buffer
+ *  \param count   Number of samples to copy
+ *
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  * The conversion is done by truncation, without dithering, so it loses resolution.
  */
 void memcpy_to_u8_from_i16(uint8_t *dst, const int16_t *src, size_t count);
 
-/* Copy samples from float to unsigned 8-bit offset by 0x80.
- * Parameters:
- *  dst     Destination buffer
- *  src     Source buffer
- *  count   Number of samples to copy
+/**
+ * Copy samples from float to unsigned 8-bit offset by 0x80.
+ *
+ *  \param dst     Destination buffer
+ *  \param src     Source buffer
+ *  \param count   Number of samples to copy
+ *
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  * The conversion is done by truncation, without dithering, so it loses resolution.
  */
 void memcpy_to_u8_from_float(uint8_t *dst, const float *src, size_t count);
 
-/* Shrink and copy samples from signed 32-bit fixed-point Q0.31 to signed 16-bit Q0.15.
- * Parameters:
- *  dst     Destination buffer
- *  src     Source buffer
- *  count   Number of samples to copy
+/**
+ * Shrink and copy samples from signed 32-bit fixed-point Q0.31 to signed 16-bit Q0.15.
+ *
+ *  \param dst     Destination buffer
+ *  \param src     Source buffer
+ *  \param count   Number of samples to copy
+ *
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  * The conversion is done by truncation, without dithering, so it loses resolution.
@@ -93,10 +105,11 @@ void memcpy_to_i16_from_i32(int16_t *dst, const int32_t *src, size_t count);
 /* Shrink and copy samples from single-precision floating-point to signed 16-bit.
  * Each float should be in the range -1.0 to 1.0.  Values outside that range are clamped,
  * refer to clamp16_from_float().
- * Parameters:
- *  dst     Destination buffer
- *  src     Source buffer
- *  count   Number of samples to copy
+ *
+ *  \param dst     Destination buffer
+ *  \param src     Source buffer
+ *  \param count   Number of samples to copy
+ *
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  * The conversion is done by truncation, without dithering, so it loses resolution.
@@ -107,10 +120,11 @@ void memcpy_to_i16_from_float(int16_t *dst, const float *src, size_t count);
  * The nominal output float range is [-1.0, 1.0] if the fixed-point range is
  * [0xf8000000, 0x07ffffff].  The full float range is [-16.0, 16.0].  Note the closed range
  * at 1.0 and 16.0 is due to rounding on conversion to float. See float_from_q4_27() for details.
- * Parameters:
- *  dst     Destination buffer
- *  src     Source buffer
- *  count   Number of samples to copy
+ *
+ *  \param dst     Destination buffer
+ *  \param src     Source buffer
+ *  \param count   Number of samples to copy
+ *
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
@@ -119,10 +133,11 @@ void memcpy_to_float_from_q4_27(float *dst, const int32_t *src, size_t count);
 /* Copy samples from signed fixed-point 16 bit Q0.15 to single-precision floating-point.
  * The output float range is [-1.0, 1.0) for the fixed-point range [0x8000, 0x7fff].
  * No rounding is needed as the representation is exact.
- * Parameters:
- *  dst     Destination buffer
- *  src     Source buffer
- *  count   Number of samples to copy
+ *
+ *  \param dst     Destination buffer
+ *  \param src     Source buffer
+ *  \param count   Number of samples to copy
+ *
  * The destination and source buffers must be completely separate.
  */
 void memcpy_to_float_from_i16(float *dst, const int16_t *src, size_t count);
@@ -130,10 +145,11 @@ void memcpy_to_float_from_i16(float *dst, const int16_t *src, size_t count);
 /* Copy samples from unsigned fixed-point 8 bit to single-precision floating-point.
  * The output float range is [-1.0, 1.0) for the fixed-point range [0x00, 0xFF].
  * No rounding is needed as the representation is exact.
- * Parameters:
- *  dst     Destination buffer
- *  src     Source buffer
- *  count   Number of samples to copy
+ *
+ *  \param dst     Destination buffer
+ *  \param src     Source buffer
+ *  \param count   Number of samples to copy
+ *
  * The destination and source buffers must be completely separate.
  */
 void memcpy_to_float_from_u8(float *dst, const uint8_t *src, size_t count);
@@ -142,10 +158,11 @@ void memcpy_to_float_from_u8(float *dst, const uint8_t *src, size_t count);
  * The packed 24 bit input is stored in native endian format in a uint8_t byte array.
  * The output float range is [-1.0, 1.0) for the fixed-point range [0x800000, 0x7fffff].
  * No rounding is needed as the representation is exact.
- * Parameters:
- *  dst     Destination buffer
- *  src     Source buffer
- *  count   Number of samples to copy
+ *
+ *  \param dst     Destination buffer
+ *  \param src     Source buffer
+ *  \param count   Number of samples to copy
+ *
  * The destination and source buffers must be completely separate.
  */
 void memcpy_to_float_from_p24(float *dst, const uint8_t *src, size_t count);
@@ -153,10 +170,11 @@ void memcpy_to_float_from_p24(float *dst, const uint8_t *src, size_t count);
 /* Copy samples from signed fixed-point packed 24 bit Q0.23 to signed fixed point 16 bit Q0.15.
  * The packed 24 bit output is stored in native endian format in a uint8_t byte array.
  * The data is truncated without rounding.
- * Parameters:
- *  dst     Destination buffer
- *  src     Source buffer
- *  count   Number of samples to copy
+ *
+ *  \param dst     Destination buffer
+ *  \param src     Source buffer
+ *  \param count   Number of samples to copy
+ *
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
@@ -165,10 +183,11 @@ void memcpy_to_i16_from_p24(int16_t *dst, const uint8_t *src, size_t count);
 /* Copy samples from signed fixed-point packed 24 bit Q0.23 to signed fixed-point 32-bit Q0.31.
  * The packed 24 bit input is stored in native endian format in a uint8_t byte array.
  * The output data range is [0x80000000, 0x7fffff00] at intervals of 0x100.
- * Parameters:
- *  dst     Destination buffer
- *  src     Source buffer
- *  count   Number of samples to copy
+ *
+ *  \param dst     Destination buffer
+ *  \param src     Source buffer
+ *  \param count   Number of samples to copy
+ *
  * The destination and source buffers must be completely separate.
  */
 void memcpy_to_i32_from_p24(int32_t *dst, const uint8_t *src, size_t count);
@@ -177,10 +196,11 @@ void memcpy_to_i32_from_p24(int32_t *dst, const uint8_t *src, size_t count);
  * The packed 24 bit output is assumed to be a native-endian uint8_t byte array.
  * The output data range is [0x800000, 0x7fff00] (not full).
  * Nevertheless there is no DC offset on the output, if the input has no DC offset.
- * Parameters:
- *  dst     Destination buffer
- *  src     Source buffer
- *  count   Number of samples to copy
+ *
+ *  \param dst     Destination buffer
+ *  \param src     Source buffer
+ *  \param count   Number of samples to copy
+ *
  * The destination and source buffers must be completely separate.
  */
 void memcpy_to_p24_from_i16(uint8_t *dst, const int16_t *src, size_t count);
@@ -189,10 +209,11 @@ void memcpy_to_p24_from_i16(uint8_t *dst, const int16_t *src, size_t count);
  * The packed 24 bit output is assumed to be a native-endian uint8_t byte array.
  * The data is clamped and rounded to nearest, ties away from zero. See clamp24_from_float()
  * for details.
- * Parameters:
- *  dst     Destination buffer
- *  src     Source buffer
- *  count   Number of samples to copy
+ *
+ *  \param dst     Destination buffer
+ *  \param src     Source buffer
+ *  \param count   Number of samples to copy
+ *
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
@@ -201,10 +222,11 @@ void memcpy_to_p24_from_float(uint8_t *dst, const float *src, size_t count);
 /* Copy samples from signed fixed-point 32-bit Q8.23 to signed fixed-point packed 24 bit Q0.23.
  * The packed 24 bit output is assumed to be a native-endian uint8_t byte array.
  * The data is clamped to the range is [0x800000, 0x7fffff].
- * Parameters:
- *  dst     Destination buffer
- *  src     Source buffer
- *  count   Number of samples to copy
+ *
+ *  \param dst     Destination buffer
+ *  \param src     Source buffer
+ *  \param count   Number of samples to copy
+ *
  * The destination and source buffers must be completely separate.
  */
 void memcpy_to_p24_from_q8_23(uint8_t *dst, const int32_t *src, size_t count);
@@ -212,10 +234,11 @@ void memcpy_to_p24_from_q8_23(uint8_t *dst, const int32_t *src, size_t count);
 /* Shrink and copy samples from signed 32-bit fixed-point Q0.31
  * to signed fixed-point packed 24 bit Q0.23.
  * The packed 24 bit output is assumed to be a native-endian uint8_t byte array.
- * Parameters:
- *  dst     Destination buffer
- *  src     Source buffer
- *  count   Number of samples to copy
+ *
+ *  \param dst     Destination buffer
+ *  \param src     Source buffer
+ *  \param count   Number of samples to copy
+ *
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  * The conversion is done by truncation, without dithering, so it loses resolution.
@@ -224,10 +247,11 @@ void memcpy_to_p24_from_i32(uint8_t *dst, const int32_t *src, size_t count);
 
 /* Copy samples from signed fixed point 16-bit Q0.15 to signed fixed-point 32-bit Q8.23.
  * The output data range is [0xff800000, 0x007fff00] at intervals of 0x100.
- * Parameters:
- *  dst     Destination buffer
- *  src     Source buffer
- *  count   Number of samples to copy
+ *
+ *  \param dst     Destination buffer
+ *  \param src     Source buffer
+ *  \param count   Number of samples to copy
+ *
  * The destination and source buffers must be completely separate.
  */
 void memcpy_to_q8_23_from_i16(int32_t *dst, const int16_t *src, size_t count);
@@ -236,10 +260,11 @@ void memcpy_to_q8_23_from_i16(int32_t *dst, const int16_t *src, size_t count);
  * This copy will clamp the Q8.23 representation to [0xff800000, 0x007fffff] even though there
  * are guard bits available. Fractional lsb is rounded to nearest, ties away from zero.
  * See clamp24_from_float() for details.
- * Parameters:
- *  dst     Destination buffer
- *  src     Source buffer
- *  count   Number of samples to copy
+ *
+ *  \param dst     Destination buffer
+ *  \param src     Source buffer
+ *  \param count   Number of samples to copy
+ *
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
@@ -247,10 +272,11 @@ void memcpy_to_q8_23_from_float_with_clamp(int32_t *dst, const float *src, size_
 
 /* Copy samples from signed fixed point packed 24-bit Q0.23 to signed fixed-point 32-bit Q8.23.
  * The output data range is [0xff800000, 0x007fffff].
- * Parameters:
- *  dst     Destination buffer
- *  src     Source buffer
- *  count   Number of samples to copy
+ *
+ *  \param dst     Destination buffer
+ *  \param src     Source buffer
+ *  \param count   Number of samples to copy
+ *
  * The destination and source buffers must be completely separate.
  */
 void memcpy_to_q8_23_from_p24(int32_t *dst, const uint8_t *src, size_t count);
@@ -259,10 +285,11 @@ void memcpy_to_q8_23_from_p24(int32_t *dst, const uint8_t *src, size_t count);
  * The conversion will use the full available Q4.27 range, including guard bits.
  * Fractional lsb is rounded to nearest, ties away from zero.
  * See clampq4_27_from_float() for details.
- * Parameters:
- *  dst     Destination buffer
- *  src     Source buffer
- *  count   Number of samples to copy
+ *
+ *  \param dst     Destination buffer
+ *  \param src     Source buffer
+ *  \param count   Number of samples to copy
+ *
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
@@ -270,10 +297,11 @@ void memcpy_to_q4_27_from_float(int32_t *dst, const float *src, size_t count);
 
 /* Copy samples from signed fixed-point 32-bit Q8.23 to signed fixed point 16-bit Q0.15.
  * The data is clamped, and truncated without rounding.
- * Parameters:
- *  dst     Destination buffer
- *  src     Source buffer
- *  count   Number of samples to copy
+ *
+ *  \param dst     Destination buffer
+ *  \param src     Source buffer
+ *  \param count   Number of samples to copy
+ *
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
@@ -284,10 +312,11 @@ void memcpy_to_i16_from_q8_23(int16_t *dst, const int32_t *src, size_t count);
  * range [0xff800000, 0x007fffff]. The maximum output float range is [-256.0, 256.0).
  * No rounding is needed as the representation is exact for nominal values.
  * Rounding for overflow values is to nearest, ties to even.
- * Parameters:
- *  dst     Destination buffer
- *  src     Source buffer
- *  count   Number of samples to copy
+ *
+ *  \param dst     Destination buffer
+ *  \param src     Source buffer
+ *  \param count   Number of samples to copy
+ *
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
@@ -295,10 +324,11 @@ void memcpy_to_float_from_q8_23(float *dst, const int32_t *src, size_t count);
 
 /* Copy samples from signed fixed point 16-bit Q0.15 to signed fixed-point 32-bit Q0.31.
  * The output data range is [0x80000000, 0x7fff0000] at intervals of 0x10000.
- * Parameters:
- *  dst     Destination buffer
- *  src     Source buffer
- *  count   Number of samples to copy
+ *
+ *  \param dst     Destination buffer
+ *  \param src     Source buffer
+ *  \param count   Number of samples to copy
+ *
  * The destination and source buffers must be completely separate.
  */
 void memcpy_to_i32_from_i16(int32_t *dst, const int16_t *src, size_t count);
@@ -306,10 +336,11 @@ void memcpy_to_i32_from_i16(int32_t *dst, const int16_t *src, size_t count);
 /* Copy samples from single-precision floating-point to signed fixed-point 32-bit Q0.31.
  * If rounding is needed on truncation, the fractional lsb is rounded to nearest,
  * ties away from zero. See clamp32_from_float() for details.
- * Parameters:
- *  dst     Destination buffer
- *  src     Source buffer
- *  count   Number of samples to copy
+ *
+ *  \param dst     Destination buffer
+ *  \param src     Source buffer
+ *  \param count   Number of samples to copy
+ *
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
@@ -318,20 +349,23 @@ void memcpy_to_i32_from_float(int32_t *dst, const float *src, size_t count);
 /* Copy samples from signed fixed-point 32-bit Q0.31 to single-precision floating-point.
  * The float range is [-1.0, 1.0] for the fixed-point range [0x80000000, 0x7fffffff].
  * Rounding is done according to float_from_i32().
- * Parameters:
- *  dst     Destination buffer
- *  src     Source buffer
- *  count   Number of samples to copy
+ *
+ *  \param dst     Destination buffer
+ *  \param src     Source buffer
+ *  \param count   Number of samples to copy
+ *
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
 void memcpy_to_float_from_i32(float *dst, const int32_t *src, size_t count);
 
-/* Downmix pairs of interleaved stereo input 16-bit samples to mono output 16-bit samples.
- * Parameters:
- *  dst     Destination buffer
- *  src     Source buffer
- *  count   Number of stereo frames to downmix
+/**
+ * Downmix pairs of interleaved stereo input 16-bit samples to mono output 16-bit samples.
+ *
+ *  \param dst     Destination buffer
+ *  \param src     Source buffer
+ *  \param count   Number of stereo frames to downmix
+ *
  * The destination and source buffers must be completely separate (non-overlapping).
  * The current implementation truncates the mean rather than dither, but this may change.
  */
@@ -339,20 +373,22 @@ void downmix_to_mono_i16_from_stereo_i16(int16_t *dst, const int16_t *src, size_
 
 /* Upmix mono input 16-bit samples to pairs of interleaved stereo output 16-bit samples by
  * duplicating.
- * Parameters:
- *  dst     Destination buffer
- *  src     Source buffer
- *  count   Number of mono samples to upmix
+ *
+ *  \param dst     Destination buffer
+ *  \param src     Source buffer
+ *  \param count   Number of mono samples to upmix
+ *
  * The destination and source buffers must be completely separate (non-overlapping).
  */
 void upmix_to_stereo_i16_from_mono_i16(int16_t *dst, const int16_t *src, size_t count);
 
 /* Downmix pairs of interleaved stereo input float samples to mono output float samples
  * by averaging the stereo pair together.
- * Parameters:
- *  dst     Destination buffer
- *  src     Source buffer
- *  count   Number of stereo frames to downmix
+ *
+ *  \param dst     Destination buffer
+ *  \param src     Source buffer
+ *  \param count   Number of stereo frames to downmix
+ *
  * The destination and source buffers must be completely separate (non-overlapping),
  * or they must both start at the same address.
  */
@@ -360,27 +396,34 @@ void downmix_to_mono_float_from_stereo_float(float *dst, const float *src, size_
 
 /* Upmix mono input float samples to pairs of interleaved stereo output float samples by
  * duplicating.
- * Parameters:
- *  dst     Destination buffer
- *  src     Source buffer
- *  count   Number of mono samples to upmix
+ *
+ *  \param dst     Destination buffer
+ *  \param src     Source buffer
+ *  \param count   Number of mono samples to upmix
+ *
  * The destination and source buffers must be completely separate (non-overlapping).
  */
 void upmix_to_stereo_float_from_mono_float(float *dst, const float *src, size_t count);
 
-/* Return the total number of non-zero 32-bit samples */
+/**
+ * \return the total number of non-zero 32-bit samples.
+ */
 size_t nonZeroMono32(const int32_t *samples, size_t count);
 
-/* Return the total number of non-zero 16-bit samples */
+/**
+ * \return the total number of non-zero 16-bit samples.
+ */
 size_t nonZeroMono16(const int16_t *samples, size_t count);
 
-/* Return the total number of non-zero stereo frames, where a frame is considered non-zero
- * if either of its constituent 32-bit samples is non-zero
+/**
+ * \return the total number of non-zero stereo frames, where a frame is considered non-zero
+ * if either of its constituent 32-bit samples is non-zero.
  */
 size_t nonZeroStereo32(const int32_t *frames, size_t count);
 
-/* Return the total number of non-zero stereo frames, where a frame is considered non-zero
- * if either of its constituent 16-bit samples is non-zero
+/**
+ * \return the total number of non-zero stereo frames, where a frame is considered non-zero
+ * if either of its constituent 16-bit samples is non-zero.
  */
 size_t nonZeroStereo16(const int16_t *frames, size_t count);
 
@@ -389,13 +432,14 @@ size_t nonZeroStereo16(const int16_t *frames, size_t count);
  * are zero filled. Unmatched channels in the source channel mask are dropped.
  * Channels present in the channel mask are represented by set bits in the
  * uint32_t value and are matched without further interpretation.
- * Parameters:
- *  dst         Destination buffer
- *  dst_mask    Bit mask corresponding to destination channels present
- *  src         Source buffer
- *  src_mask    Bit mask corresponding to source channels present
- *  sample_size Size of each sample in bytes.  Must be 1, 2, 3, or 4.
- *  count       Number of frames to copy
+ *
+ *  \param dst         Destination buffer
+ *  \param dst_mask    Bit mask corresponding to destination channels present
+ *  \param src         Source buffer
+ *  \param src_mask    Bit mask corresponding to source channels present
+ *  \param sample_size Size of each sample in bytes.  Must be 1, 2, 3, or 4.
+ *  \param count       Number of frames to copy
+ *
  * The destination and source buffers must be completely separate (non-overlapping).
  * If the sample size is not in range, the function will abort.
  */
@@ -409,27 +453,31 @@ void memcpy_by_channel_mask(void *dst, uint32_t dst_mask,
  * A negative index (-1) represents filling with 0.
  *
  * Example: Swapping L and R channels for stereo streams
+ * <PRE>
  * idxary[0] = 1;
  * idxary[1] = 0;
+ * </PRE>
  *
  * Example: Copying a mono source to the front center 5.1 channel
+ * <PRE>
  * idxary[0] = -1;
  * idxary[1] = -1;
  * idxary[2] = 0;
  * idxary[3] = -1;
  * idxary[4] = -1;
  * idxary[5] = -1;
+ * </PRE>
  *
  * This copy allows swizzling of channels or replication of channels.
  *
- * Parameters:
- *  dst           Destination buffer
- *  dst_channels  Number of destination channels per frame
- *  src           Source buffer
- *  src_channels  Number of source channels per frame
- *  idxary        Array of indices representing channels in the source frame
- *  sample_size   Size of each sample in bytes.  Must be 1, 2, 3, or 4.
- *  count         Number of frames to copy
+ *  \param dst           Destination buffer
+ *  \param dst_channels  Number of destination channels per frame
+ *  \param src           Source buffer
+ *  \param src_channels  Number of source channels per frame
+ *  \param idxary        Array of indices representing channels in the source frame
+ *  \param sample_size   Size of each sample in bytes.  Must be 1, 2, 3, or 4.
+ *  \param count         Number of frames to copy
+ *
  * The destination and source buffers must be completely separate (non-overlapping).
  * If the sample size is not in range, the function will abort.
  */
@@ -438,9 +486,13 @@ void memcpy_by_index_array(void *dst, uint32_t dst_channels,
         const int8_t *idxary, size_t sample_size, size_t count);
 
 /* Prepares an index array (idxary) from channel masks, which can be later
- * used by memcpy_by_index_array(). Returns the number of array elements required.
+ * used by memcpy_by_index_array().
+ *
+ * \return the number of array elements required.
  * This may be greater than idxcount, so the return value should be checked
- * if idxary size is less than 32. Note that idxary is a caller allocated array
+ * if idxary size is less than 32.
+ *
+ * Note that idxary is a caller allocated array
  * of at least as many channels as present in the dst_mask.
  * Channels present in the channel mask are represented by set bits in the
  * uint32_t value and are matched without further interpretation.
@@ -448,17 +500,18 @@ void memcpy_by_index_array(void *dst, uint32_t dst_channels,
  * This function is typically used for converting audio data with different
  * channel position masks.
  *
- * Parameters:
- *  idxary      Updated array of indices of channels in the src frame for the dst frame
- *  idxcount    Number of caller allocated elements in idxary
- *  dst_mask    Bit mask corresponding to destination channels present
- *  src_mask    Bit mask corresponding to source channels present
+ *  \param idxary      Updated array of indices of channels in the src frame for the dst frame
+ *  \param idxcount    Number of caller allocated elements in idxary
+ *  \param dst_mask    Bit mask corresponding to destination channels present
+ *  \param src_mask    Bit mask corresponding to source channels present
  */
 size_t memcpy_by_index_array_initialization(int8_t *idxary, size_t idxcount,
         uint32_t dst_mask, uint32_t src_mask);
 
 /* Prepares an index array (idxary) from channel masks, which can be later
- * used by memcpy_by_index_array(). Returns the number of array elements required.
+ * used by memcpy_by_index_array().
+ *
+ * \return the number of array elements required.
  *
  * For a source channel index mask, the source channels will map to the destination
  * channels as if counting the set bits in dst_mask in order from lsb to msb
@@ -466,17 +519,18 @@ size_t memcpy_by_index_array_initialization(int8_t *idxary, size_t idxcount,
  * ith SET bit of dst_mask and the ith destination channel.  Hence, a zero ith
  * bit of the src_mask indicates that the ith destination channel plays silence.
  *
- * Parameters:
- *  idxary      Updated array of indices of channels in the src frame for the dst frame
- *  idxcount    Number of caller allocated elements in idxary
- *  dst_mask    Bit mask corresponding to destination channels present
- *  src_mask    Bit mask corresponding to source channels present
+ *  \param idxary      Updated array of indices of channels in the src frame for the dst frame
+ *  \param idxcount    Number of caller allocated elements in idxary
+ *  \param dst_mask    Bit mask corresponding to destination channels present
+ *  \param src_mask    Bit mask corresponding to source channels present
  */
 size_t memcpy_by_index_array_initialization_src_index(int8_t *idxary, size_t idxcount,
         uint32_t dst_mask, uint32_t src_mask);
 
 /* Prepares an index array (idxary) from channel mask bits, which can be later
- * used by memcpy_by_index_array(). Returns the number of array elements required.
+ * used by memcpy_by_index_array().
+ *
+ * \return the number of array elements required.
  *
  * This initialization is for a destination channel index mask from a positional
  * source mask.
@@ -487,11 +541,10 @@ size_t memcpy_by_index_array_initialization_src_index(int8_t *idxary, size_t idx
  * of set destination bits (unlikely), the corresponding source channel will
  * be dropped.
  *
- * Parameters:
- *  idxary      Updated array of indices of channels in the src frame for the dst frame
- *  idxcount    Number of caller allocated elements in idxary
- *  dst_mask    Bit mask corresponding to destination channels present
- *  src_mask    Bit mask corresponding to source channels present
+ *  \param idxary      Updated array of indices of channels in the src frame for the dst frame
+ *  \param idxcount    Number of caller allocated elements in idxary
+ *  \param dst_mask    Bit mask corresponding to destination channels present
+ *  \param src_mask    Bit mask corresponding to source channels present
  */
 size_t memcpy_by_index_array_initialization_dst_index(int8_t *idxary, size_t idxcount,
         uint32_t dst_mask, uint32_t src_mask);
@@ -954,6 +1007,8 @@ int32_t mulRL(int left, uint32_t inRL, uint32_t vRL)
 #endif
 }
 
+/** \cond */
 __END_DECLS
+/** \endcond */
 
 #endif  // ANDROID_AUDIO_PRIMITIVES_H
