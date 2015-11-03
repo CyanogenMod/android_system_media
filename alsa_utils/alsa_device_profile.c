@@ -332,7 +332,21 @@ static int read_alsa_device_config(alsa_device_profile * profile, struct pcm_con
 #endif
 
     config->channels = pcm_params_get_min(alsa_hw_params, PCM_PARAM_CHANNELS);
+    // For output devices, let's make sure we choose at least stereo
+    // (assuming the device supports it).
+    if (profile->direction == PCM_OUT &&
+        config->channels < 2 && pcm_params_get_max(alsa_hw_params, PCM_PARAM_CHANNELS) >= 2) {
+        config->channels = 2;
+    }
     config->rate = pcm_params_get_min(alsa_hw_params, PCM_PARAM_RATE);
+    // Prefer 48K or 44.1K
+    if (config->rate < 48000 &&
+        pcm_params_get_max(alsa_hw_params, PCM_PARAM_RATE) >= 48000) {
+        config->rate = 48000;
+    } else if (config->rate < 441000 &&
+               pcm_params_get_max(alsa_hw_params, PCM_PARAM_RATE) >= 44100) {
+        config->rate = 44100;
+    }
     config->period_size = profile_calc_min_period_size(profile, config->rate);
     config->period_count = pcm_params_get_min(alsa_hw_params, PCM_PARAM_PERIODS);
     config->format = get_pcm_format_for_mask(pcm_params_get_mask(alsa_hw_params, PCM_PARAM_FORMAT));
