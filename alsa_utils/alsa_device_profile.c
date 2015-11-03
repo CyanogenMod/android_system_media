@@ -288,6 +288,12 @@ static unsigned profile_enum_channel_counts(alsa_device_profile* profile, unsign
             profile->channel_counts[num_counts++] = std_channel_counts[index];
         }
     }
+    // if we have no match with the standard counts, we use the largest (preferred) std count.
+    if (num_counts == 0) {
+        ALOGW("usb device does not match std channel counts, setting to %d",
+                std_channel_counts[0]);
+        profile->channel_counts[num_counts++] = std_channel_counts[0];
+    }
     profile->channel_counts[num_counts] = 0;
     return num_counts; /* return # of supported counts */
 }
