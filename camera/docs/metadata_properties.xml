@@ -4567,7 +4567,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               * The maximum available resolution for RAW_SENSOR streams
                 will match either the value in
                 android.sensor.info.pixelArraySize or
-                android.sensor.info.activeArraySize.
+                android.sensor.info.preCorrectionActiveArraySize.
               * All DNG-related optional metadata entries are provided
                 by the camera device.
               </notes>
