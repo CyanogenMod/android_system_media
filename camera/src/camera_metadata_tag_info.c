@@ -492,6 +492,12 @@ static tag_info_t android_sensor[ANDROID_SENSOR_END -
     { "availableTestPatternModes",     TYPE_INT32  },
     [ ANDROID_SENSOR_ROLLING_SHUTTER_SKEW - ANDROID_SENSOR_START ] =
     { "rollingShutterSkew",            TYPE_INT64  },
+    [ ANDROID_SENSOR_OPTICAL_BLACK_REGIONS - ANDROID_SENSOR_START ] =
+    { "opticalBlackRegions",           TYPE_INT32  },
+    [ ANDROID_SENSOR_DYNAMIC_BLACK_LEVEL - ANDROID_SENSOR_START ] =
+    { "dynamicBlackLevel",             TYPE_INT32  },
+    [ ANDROID_SENSOR_DYNAMIC_WHITE_LEVEL - ANDROID_SENSOR_START ] =
+    { "dynamicWhiteLevel",             TYPE_INT32  },
 };
 
 static tag_info_t android_sensor_info[ANDROID_SENSOR_INFO_END -
@@ -2086,6 +2092,15 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_SENSOR_ROLLING_SHUTTER_SKEW: {
+            break;
+        }
+        case ANDROID_SENSOR_OPTICAL_BLACK_REGIONS: {
+            break;
+        }
+        case ANDROID_SENSOR_DYNAMIC_BLACK_LEVEL: {
+            break;
+        }
+        case ANDROID_SENSOR_DYNAMIC_WHITE_LEVEL: {
             break;
         }
 

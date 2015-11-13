@@ -799,6 +799,8 @@
             ><a href="#static_android.sensor.profileHueSatMapDimensions">android.sensor.profileHueSatMapDimensions</a></li>
             <li
             ><a href="#static_android.sensor.availableTestPatternModes">android.sensor.availableTestPatternModes</a></li>
+            <li
+            ><a href="#static_android.sensor.opticalBlackRegions">android.sensor.opticalBlackRegions</a></li>
           </ul>
         </li>
         <li>
@@ -830,6 +832,10 @@
             ><a href="#dynamic_android.sensor.testPatternMode">android.sensor.testPatternMode</a></li>
             <li
             ><a href="#dynamic_android.sensor.rollingShutterSkew">android.sensor.rollingShutterSkew</a></li>
+            <li
+            ><a href="#dynamic_android.sensor.dynamicBlackLevel">android.sensor.dynamicBlackLevel</a></li>
+            <li
+            ><a href="#dynamic_android.sensor.dynamicWhiteLevel">android.sensor.dynamicWhiteLevel</a></li>
           </ul>
         </li>
       </ul> <!-- toc_section -->
@@ -18918,6 +18924,11 @@ each channel is specified by the offset in the
 (8-14 bits is expected),<wbr/> or by the point where the sensor response
 becomes too non-linear to be useful.<wbr/>  The default value for this is
 maximum representable value for a 16-bit raw sample (2^16 - 1).<wbr/></p>
+<p>The white level values of captured images may vary for different
+capture settings (e.<wbr/>g.,<wbr/> <a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a>).<wbr/> This key
+represents a coarse approximation for such case.<wbr/> It is recommended
+to use <a href="#dynamic_android.sensor.dynamicWhiteLevel">android.<wbr/>sensor.<wbr/>dynamic<wbr/>White<wbr/>Level</a> for captures when supported
+by the camera device,<wbr/> which provides more accurate white level values.<wbr/></p>
             </td>
           </tr>
 
@@ -19886,6 +19897,15 @@ sensor is represented by the value in <a href="#static_android.sensor.info.white
 layout key (see <a href="#static_android.sensor.info.colorFilterArrangement">android.<wbr/>sensor.<wbr/>info.<wbr/>color<wbr/>Filter<wbr/>Arrangement</a>),<wbr/> i.<wbr/>e.<wbr/> the
 nth value given corresponds to the black level offset for the nth
 color channel listed in the CFA.<wbr/></p>
+<p>The black level values of captured images may vary for different
+capture settings (e.<wbr/>g.,<wbr/> <a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a>).<wbr/> This key
+represents a coarse approximation for such case.<wbr/> It is recommended to
+use <a href="#dynamic_android.sensor.dynamicBlackLevel">android.<wbr/>sensor.<wbr/>dynamic<wbr/>Black<wbr/>Level</a> or use pixels from
+<a href="#static_android.sensor.opticalBlackRegions">android.<wbr/>sensor.<wbr/>optical<wbr/>Black<wbr/>Regions</a> directly for captures when
+supported by the camera device,<wbr/> which provides more accurate black
+level values.<wbr/> For raw capture in particular,<wbr/> it is recommended to use
+pixels from <a href="#static_android.sensor.opticalBlackRegions">android.<wbr/>sensor.<wbr/>optical<wbr/>Black<wbr/>Regions</a> to calculate black
+level values for each frame.<wbr/></p>
             </td>
           </tr>
 
@@ -20124,6 +20144,85 @@ supported by this camera device.<wbr/></p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>All custom modes must be &gt;= CUSTOM1.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.sensor.opticalBlackRegions">
+            <td class="entry_name
+             " rowspan="5">
+              android.<wbr/>sensor.<wbr/>optical<wbr/>Black<wbr/>Regions
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">int32</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  4 x num_regions
+                </span>
+              <span class="entry_type_visibility"> [public as rectangle]</span>
+
+
+
+
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>List of disjoint rectangles indicating the sensor
+optically shielded black pixel regions.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>In most camera sensors,<wbr/> the active array is surrounded by some
+optically shielded pixel areas.<wbr/> By blocking light,<wbr/> these pixels
+provides a reliable black reference for black level compensation
+in active array region.<wbr/></p>
+<p>This key provides a list of disjoint rectangles specifying the
+regions of optically shielded (with metal shield) black pixel
+regions if the camera device is capable of reading out these black
+pixels in the output raw images.<wbr/> In comparison to the fixed black
+level values reported by <a href="#static_android.sensor.blackLevelPattern">android.<wbr/>sensor.<wbr/>black<wbr/>Level<wbr/>Pattern</a>,<wbr/> this key
+may provide a more accurate way for the application to calculate
+black level of each captured raw images.<wbr/></p>
+<p>When this key is reported,<wbr/> the <a href="#dynamic_android.sensor.dynamicBlackLevel">android.<wbr/>sensor.<wbr/>dynamic<wbr/>Black<wbr/>Level</a> and
+<a href="#dynamic_android.sensor.dynamicWhiteLevel">android.<wbr/>sensor.<wbr/>dynamic<wbr/>White<wbr/>Level</a> will also be reported.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This array contains (xmin,<wbr/> ymin,<wbr/> width,<wbr/> height).<wbr/> The (xmin,<wbr/> ymin)
+must be &gt;= (0,<wbr/>0) and &lt;=
+<a href="#static_android.sensor.info.pixelArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pixel<wbr/>Array<wbr/>Size</a>.<wbr/> The (width,<wbr/> height) must be
+&lt;= <a href="#static_android.sensor.info.pixelArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pixel<wbr/>Array<wbr/>Size</a>.<wbr/> Each region must be
+outside the region reported by
+<a href="#static_android.sensor.info.preCorrectionActiveArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pre<wbr/>Correction<wbr/>Active<wbr/>Array<wbr/>Size</a>.<wbr/></p>
+<p>The HAL must report minimal number of disjoint regions for the
+optically shielded back pixel regions.<wbr/> For example,<wbr/> if a region can
+be covered by one rectangle,<wbr/> the HAL must not split this region into
+multiple rectangles.<wbr/></p>
             </td>
           </tr>
 
@@ -21175,6 +21274,160 @@ to the frame readout time.<wbr/></p>
             <td class="entry_details" colspan="5">
               <p>The HAL must report <code>0</code> if the sensor is using global shutter,<wbr/> where all pixels begin
 exposure at the same time.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="dynamic_android.sensor.dynamicBlackLevel">
+            <td class="entry_name
+             " rowspan="5">
+              android.<wbr/>sensor.<wbr/>dynamic<wbr/>Black<wbr/>Level
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">int32</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  4
+                </span>
+              <span class="entry_type_visibility"> [public as blackLevelPattern]</span>
+
+
+
+
+                <div class="entry_type_notes">2x2 raw count block</div>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>A per-frame dynamic black level offset for each of the color filter
+arrangement (CFA) mosaic channels.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p>&gt;= 0 for each.<wbr/></p>
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_RAW">RAW</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>Camera sensor black levels may vary dramatically for different
+capture settings (e.<wbr/>g.<wbr/> <a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a>).<wbr/> The fixed black
+level reported by <a href="#static_android.sensor.blackLevelPattern">android.<wbr/>sensor.<wbr/>black<wbr/>Level<wbr/>Pattern</a> may be too
+inaccurate to represent the actual value on a per-frame basis.<wbr/> The
+camera device internal pipeline relies on reliable black level values
+to process the raw images appropriately.<wbr/> To get the best image
+quality,<wbr/> the camera device may choose to estimate the per frame black
+level values either based on optically shielded black regions
+(<a href="#static_android.sensor.opticalBlackRegions">android.<wbr/>sensor.<wbr/>optical<wbr/>Black<wbr/>Regions</a>) or its internal model.<wbr/></p>
+<p>This key reports the camera device estimated per-frame zero light
+value for each of the CFA mosaic channels in the camera sensor.<wbr/> The
+<a href="#static_android.sensor.blackLevelPattern">android.<wbr/>sensor.<wbr/>black<wbr/>Level<wbr/>Pattern</a> may only represent a coarse
+approximation of the actual black level values.<wbr/> This value is the
+black level used in camera device internal image processing pipeline
+and generally more accurate than the fixed black level values.<wbr/>
+However,<wbr/> since they are estimated values by the camera device,<wbr/> they
+may not be as accurate as the black level values calculated from the
+optical black pixels reported by <a href="#static_android.sensor.opticalBlackRegions">android.<wbr/>sensor.<wbr/>optical<wbr/>Black<wbr/>Regions</a>.<wbr/></p>
+<p>The values are given in the same order as channels listed for the CFA
+layout key (see <a href="#static_android.sensor.info.colorFilterArrangement">android.<wbr/>sensor.<wbr/>info.<wbr/>color<wbr/>Filter<wbr/>Arrangement</a>),<wbr/> i.<wbr/>e.<wbr/> the
+nth value given corresponds to the black level offset for the nth
+color channel listed in the CFA.<wbr/></p>
+<p>This key will be available if <a href="#static_android.sensor.opticalBlackRegions">android.<wbr/>sensor.<wbr/>optical<wbr/>Black<wbr/>Regions</a> is
+available or the camera device advertises this key via
+<a href="https://developer.android.com/reference/android/hardware/camera2/CameraCharacteristics.html#getAvailableCaptureRequestKeys">CameraCharacteristics#getAvailableCaptureRequestKeys</a>.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The values are given in row-column scan order,<wbr/> with the first value
+corresponding to the element of the CFA in row=0,<wbr/> column=0.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="dynamic_android.sensor.dynamicWhiteLevel">
+            <td class="entry_name
+             " rowspan="5">
+              android.<wbr/>sensor.<wbr/>dynamic<wbr/>White<wbr/>Level
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">int32</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+
+
+
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Maximum raw value output by sensor for this frame.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p>&gt;= 0</p>
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_RAW">RAW</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>Since the android.<wbr/>sensor.<wbr/>black<wbr/>Level may change for different
+capture settings (e.<wbr/>g.,<wbr/> <a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a>),<wbr/> the white
+level will change accordingly.<wbr/> This key is similar to
+<a href="#static_android.sensor.info.whiteLevel">android.<wbr/>sensor.<wbr/>info.<wbr/>white<wbr/>Level</a>,<wbr/> but specifies the camera device
+estimated white level for each frame.<wbr/></p>
+<p>This key will be available if <a href="#static_android.sensor.opticalBlackRegions">android.<wbr/>sensor.<wbr/>optical<wbr/>Black<wbr/>Regions</a> is
+available or the camera device advertises this key via
+<a href="https://developer.android.com/reference/android/hardware/camera2/CameraCharacteristics.html#getAvailableCaptureRequestKeys">CameraCharacteristics#getAvailableCaptureRequestKeys</a>.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The full bit depth of the sensor must be available in the raw data,<wbr/>
+so the value for linear sensors should not be significantly lower
+than maximum raw value supported,<wbr/> i.<wbr/>e.<wbr/> 2^(sensor bits per pixel).<wbr/></p>
             </td>
           </tr>
 
@@ -26549,6 +26802,8 @@ corrupted during depth measurement.<wbr/></p>
           <li><a href="#dynamic_android.sensor.profileHueSatMap">android.sensor.profileHueSatMap</a> (dynamic)</li>
           <li><a href="#dynamic_android.sensor.profileToneCurve">android.sensor.profileToneCurve</a> (dynamic)</li>
           <li><a href="#dynamic_android.sensor.greenSplit">android.sensor.greenSplit</a> (dynamic)</li>
+          <li><a href="#dynamic_android.sensor.dynamicBlackLevel">android.sensor.dynamicBlackLevel</a> (dynamic)</li>
+          <li><a href="#dynamic_android.sensor.dynamicWhiteLevel">android.sensor.dynamicWhiteLevel</a> (dynamic)</li>
           <li><a href="#controls_android.statistics.hotPixelMapMode">android.statistics.hotPixelMapMode</a> (controls)</li>
           <li><a href="#static_android.statistics.info.availableHotPixelMapModes">android.statistics.info.availableHotPixelMapModes</a> (static)</li>
           <li><a href="#dynamic_android.statistics.hotPixelMap">android.statistics.hotPixelMap</a> (dynamic)</li>
