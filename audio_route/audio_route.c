@@ -728,6 +728,7 @@ static int audio_route_update_path(struct audio_route *ar, const char *name, boo
 
         type = mixer_ctl_get_type(ms->ctl);
         if (!is_supported_ctl_type(type)) {
+            i = reverse ? (i - 1) : (i + 1);
             continue;
         }
 
