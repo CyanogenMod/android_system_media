@@ -7070,9 +7070,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
       </static>
       <dynamic>
-        <entry name="dynamicBlackLevel" type="int32" visibility="public"
-        optional="true" type_notes="2x2 raw count block" container="array"
-        typedef="blackLevelPattern">
+        <entry name="dynamicBlackLevel" type="float" visibility="public"
+        optional="true" type_notes="2x2 raw count block" container="array">
           <array>
             <size>4</size>
           </array>
@@ -7117,7 +7116,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </hal_details>
           <tag id="RAW" />
         </entry>
-        <entry name="dynamicWhiteLevel" type="int32" visibility="public">
+        <entry name="dynamicWhiteLevel" type="int32" visibility="public"
+        optional="true" >
           <description>
           Maximum raw value output by sensor for this frame.
           </description>

@@ -495,7 +495,7 @@ static tag_info_t android_sensor[ANDROID_SENSOR_END -
     [ ANDROID_SENSOR_OPTICAL_BLACK_REGIONS - ANDROID_SENSOR_START ] =
     { "opticalBlackRegions",           TYPE_INT32  },
     [ ANDROID_SENSOR_DYNAMIC_BLACK_LEVEL - ANDROID_SENSOR_START ] =
-    { "dynamicBlackLevel",             TYPE_INT32  },
+    { "dynamicBlackLevel",             TYPE_FLOAT  },
     [ ANDROID_SENSOR_DYNAMIC_WHITE_LEVEL - ANDROID_SENSOR_START ] =
     { "dynamicWhiteLevel",             TYPE_INT32  },
 };

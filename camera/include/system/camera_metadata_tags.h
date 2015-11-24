@@ -308,7 +308,7 @@ typedef enum camera_metadata_tag {
     ANDROID_SENSOR_AVAILABLE_TEST_PATTERN_MODES,      // int32[]      | public
     ANDROID_SENSOR_ROLLING_SHUTTER_SKEW,              // int64        | public
     ANDROID_SENSOR_OPTICAL_BLACK_REGIONS,             // int32[]      | public
-    ANDROID_SENSOR_DYNAMIC_BLACK_LEVEL,               // int32[]      | public
+    ANDROID_SENSOR_DYNAMIC_BLACK_LEVEL,               // float[]      | public
     ANDROID_SENSOR_DYNAMIC_WHITE_LEVEL,               // int32        | public
     ANDROID_SENSOR_END,
 
