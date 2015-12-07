@@ -5128,8 +5128,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             </value>
             <value optional="true" id="0x24">RAW_OPAQUE
               <notes>
-              RAW_OPAQUE is a format for raw image buffers coming from an
-              image sensor.
+              RAW_OPAQUE (or
+              {@link android.graphics.ImageFormat#RAW_PRIVATE RAW_PRIVATE}
+              as referred in public API) is a format for raw image buffers
+              coming from an image sensor.
 
               The actual structure of buffers of this format is
               platform-specific, but must follow several constraints:
@@ -7141,6 +7143,31 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="RAW" />
         </entry>
       </dynamic>
+      <static>
+        <entry name="opaqueRawSize" type="int32" visibility="system" container="array">
+          <array>
+            <size>n</size>
+            <size>3</size>
+          </array>
+          <description>Size in bytes for all the listed opaque RAW buffer sizes</description>
+          <range>Must be large enough to fit the opaque RAW of corresponding size produced by
+          the camera</range>
+          <details>
+          This configurations are listed as `(width, height, size_in_bytes)` tuples.
+          This is used for sizing the gralloc buffers for opaque RAW buffers.
+          All RAW_OPAQUE output stream configuration listed in
+          android.scaler.availableStreamConfigurations will have a corresponding tuple in
+          this key.
+          </details>
+          <hal_details>
+              This key is added in HAL3.4.
+              For HAL3.4 or above: devices advertising RAW_OPAQUE format output must list this key.
+              For HAL3.3 or earlier devices: if RAW_OPAQUE ouput is advertised, camera framework
+              will derive this key by assuming each pixel takes two bytes and no padding bytes
+              between rows.
+          </hal_details>
+        </entry>
+      </static>
     </section>
     <section name="shading">
       <controls>

@@ -801,6 +801,8 @@
             ><a href="#static_android.sensor.availableTestPatternModes">android.sensor.availableTestPatternModes</a></li>
             <li
             ><a href="#static_android.sensor.opticalBlackRegions">android.sensor.opticalBlackRegions</a></li>
+            <li
+            ><a href="#static_android.sensor.opaqueRawSize">android.sensor.opaqueRawSize</a></li>
           </ul>
         </li>
         <li>
@@ -16411,8 +16413,10 @@ the full set of performance guarantees.<wbr/></p></span>
                     <span class="entry_type_enum_name">RAW_OPAQUE</span>
                     <span class="entry_type_enum_optional">[optional]</span>
                     <span class="entry_type_enum_value">0x24</span>
-                    <span class="entry_type_enum_notes"><p>RAW_<wbr/>OPAQUE is a format for raw image buffers coming from an
-image sensor.<wbr/></p>
+                    <span class="entry_type_enum_notes"><p>RAW_<wbr/>OPAQUE (or
+<a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#RAW_PRIVATE">RAW_<wbr/>PRIVATE</a>
+as referred in public API) is a format for raw image buffers
+coming from an image sensor.<wbr/></p>
 <p>The actual structure of buffers of this format is
 platform-specific,<wbr/> but must follow several constraints:</p>
 <ol>
@@ -20223,6 +20227,73 @@ outside the region reported by
 optically shielded back pixel regions.<wbr/> For example,<wbr/> if a region can
 be covered by one rectangle,<wbr/> the HAL must not split this region into
 multiple rectangles.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.sensor.opaqueRawSize">
+            <td class="entry_name
+             " rowspan="5">
+              android.<wbr/>sensor.<wbr/>opaque<wbr/>Raw<wbr/>Size
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">int32</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  n x 3
+                </span>
+              <span class="entry_type_visibility"> [system]</span>
+
+
+
+
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Size in bytes for all the listed opaque RAW buffer sizes</p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p>Must be large enough to fit the opaque RAW of corresponding size produced by
+the camera</p>
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This configurations are listed as <code>(width,<wbr/> height,<wbr/> size_<wbr/>in_<wbr/>bytes)</code> tuples.<wbr/>
+This is used for sizing the gralloc buffers for opaque RAW buffers.<wbr/>
+All RAW_<wbr/>OPAQUE output stream configuration listed in
+<a href="#static_android.scaler.availableStreamConfigurations">android.<wbr/>scaler.<wbr/>available<wbr/>Stream<wbr/>Configurations</a> will have a corresponding tuple in
+this key.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This key is added in HAL3.<wbr/>4.<wbr/>
+For HAL3.<wbr/>4 or above: devices advertising RAW_<wbr/>OPAQUE format output must list this key.<wbr/>
+For HAL3.<wbr/>3 or earlier devices: if RAW_<wbr/>OPAQUE ouput is advertised,<wbr/> camera framework
+will derive this key by assuming each pixel takes two bytes and no padding bytes
+between rows.<wbr/></p>
             </td>
           </tr>
 
