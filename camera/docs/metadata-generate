@@ -21,7 +21,7 @@
 #   docs.html
 #   ../src/camera_metadata_tag_info.c
 #   ../src/camera_metadata_tags.h
-#   ../../../../cts/tests/tests/hardware/src/android/hardware/camera2/cts/CaptureResultTest.java
+#   ../../../../cts/tests/camera/src/android/hardware/camera2/cts/CaptureResultTest.java
 #   ../../../../frameworks/base/core/java/android/hardware/camera2/CameraCharacteristics.java
 #   ../../../../frameworks/base/core/java/android/hardware/camera2/CaptureRequest.java
 #   ../../../../frameworks/base/core/java/android/hardware/camera2/CaptureResult.java
@@ -34,7 +34,7 @@ fi
 thisdir=$(cd "$(dirname "$0")"; pwd)
 fwkdir="$ANDROID_BUILD_TOP/frameworks/base/core/java/android/hardware/camera2/"
 fwkdir_html="$ANDROID_BUILD_TOP/frameworks/base/docs/html"
-ctsdir="$ANDROID_BUILD_TOP/cts/tests/tests/hardware/src/android/hardware/camera2/cts"
+ctsdir="$ANDROID_BUILD_TOP/cts/tests/camera/src/android/hardware/camera2/cts"
 outdir="$ANDROID_PRODUCT_OUT/obj/ETC/system-media-camera-docs_intermediates"
 out_files=()
 
