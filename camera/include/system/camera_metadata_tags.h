@@ -310,6 +310,7 @@ typedef enum camera_metadata_tag {
     ANDROID_SENSOR_OPTICAL_BLACK_REGIONS,             // int32[]      | public
     ANDROID_SENSOR_DYNAMIC_BLACK_LEVEL,               // float[]      | public
     ANDROID_SENSOR_DYNAMIC_WHITE_LEVEL,               // int32        | public
+    ANDROID_SENSOR_OPAQUE_RAW_SIZE,                   // int32[]      | system
     ANDROID_SENSOR_END,
 
     ANDROID_SENSOR_INFO_ACTIVE_ARRAY_SIZE =           // int32[]      | public

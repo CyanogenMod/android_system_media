@@ -498,6 +498,8 @@ static tag_info_t android_sensor[ANDROID_SENSOR_END -
     { "dynamicBlackLevel",             TYPE_FLOAT  },
     [ ANDROID_SENSOR_DYNAMIC_WHITE_LEVEL - ANDROID_SENSOR_START ] =
     { "dynamicWhiteLevel",             TYPE_INT32  },
+    [ ANDROID_SENSOR_OPAQUE_RAW_SIZE - ANDROID_SENSOR_START ] =
+    { "opaqueRawSize",                 TYPE_INT32  },
 };
 
 static tag_info_t android_sensor_info[ANDROID_SENSOR_INFO_END -
@@ -2101,6 +2103,9 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_SENSOR_DYNAMIC_WHITE_LEVEL: {
+            break;
+        }
+        case ANDROID_SENSOR_OPAQUE_RAW_SIZE: {
             break;
         }
 
