@@ -22,6 +22,7 @@
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <cutils/properties.h>
 
 #include <log/log.h>
 
@@ -31,8 +32,7 @@
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
-/*TODO - Evaluate if this value should/can be retrieved from a device-specific property */
-#define BUFF_DURATION_MS   5
+#define PERIOD_SIZE_US (5 * 1000)
 
 #define DEFAULT_PERIOD_SIZE 1024
 
@@ -113,11 +113,13 @@ unsigned profile_calc_min_period_size(alsa_device_profile* profile, unsigned sam
     if (profile == NULL) {
         return DEFAULT_PERIOD_SIZE;
     } else {
-        unsigned num_sample_frames = (sample_rate * BUFF_DURATION_MS) / 1000;
+        unsigned period_us = property_get_int32("ro.audio.usb.period_us", PERIOD_SIZE_US);
+        unsigned num_sample_frames = ((uint64_t)sample_rate * period_us) / 1000000;
+
         if (num_sample_frames < profile->min_period_size) {
             num_sample_frames = profile->min_period_size;
         }
-        return round_to_16_mult(num_sample_frames) * 2;
+        return round_to_16_mult(num_sample_frames);
     }
 }
 
