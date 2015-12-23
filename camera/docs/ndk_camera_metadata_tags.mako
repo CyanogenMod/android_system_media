@@ -1,0 +1,118 @@
+## -*- coding: utf-8 -*-
+/*
+ * Copyright (C) 2015 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+ * This file defines an NDK API.
+ * Do not remove methods.
+ * Do not change method signatures.
+ * Do not change the value of constants.
+ * Do not change the size of any of the classes defined in here.
+ * Do not reference types that are not part of the NDK.
+ * Do not #include files that aren't part of the NDK.
+ */
+
+#ifndef _NDK_CAMERA_METADATA_TAGS_H
+#define _NDK_CAMERA_METADATA_TAGS_H
+<%!
+  def annotated_type(entry):
+    type = entry.type
+    if entry.container == 'array':
+       type += '[' + '*'.join(entry.container_sizes) + ']'
+    if entry.enum:
+       type += ' (enum)'
+
+    return type
+%>\
+\
+
+typedef enum acamera_metadata_section {
+  % for i in find_all_sections(metadata):
+    ${ndk(path_name(i)) | csym},
+  % endfor
+    ACAMERA_SECTION_COUNT,
+
+    ACAMERA_VENDOR = 0x8000
+} acamera_metadata_section_t;
+
+/**
+ * Hierarchy positions in enum space.
+ */
+typedef enum acamera_metadata_section_start {
+  % for i in find_all_sections(metadata):
+    ${ndk(path_name(i)) + '.start' | csym,ljust(30)} = ${ndk(path_name(i)) | csym,pad(64)} << 16,
+  % endfor
+    ACAMERA_VENDOR_START           = ACAMERA_VENDOR            << 16
+} acamera_metadata_section_start_t;
+
+/**
+ * Main enum for camera metadata tags.
+ */
+typedef enum acamera_metadata_tag {
+    % for sec in find_all_sections(metadata):
+      % for idx,entry in enumerate(remove_synthetic(find_unique_entries(sec))):
+        % if idx == 0:
+          % if entry.applied_visibility != "system":
+            % if entry.deprecated:
+    ${ndk(entry.name) + " = " | csym,ljust(60)}// Deprecated! DO NOT USE
+            % else:
+    ${ndk(entry.name) + " = " | csym,ljust(60)}// ${annotated_type(entry)}
+            % endif
+          % else:
+    ${ndk(path_name(find_parent_section(entry))) | csym}_RESERVED_${idx} =
+          % endif
+            ${ndk(path_name(find_parent_section(entry))) | csym}_START,
+        % else:
+          % if entry.applied_visibility != "system":
+            % if entry.deprecated:
+    ${ndk(entry.name) + "," | csym,ljust(60)}// Deprecated! DO NOT USE
+            % else:
+    ${ndk(entry.name) + "," | csym,ljust(60)}// ${annotated_type(entry)}
+            % endif
+          % else:
+    ${ndk(path_name(find_parent_section(entry))) | csym}_RESERVED_${idx},
+          % endif
+        % endif
+      % endfor
+    ${ndk(path_name(sec)) | csym}_END,
+
+    %endfor
+} acamera_metadata_tag_t;
+
+/**
+ * Enumeration definitions for the various entries that need them
+ */
+
+% for sec in find_all_sections(metadata):
+  % for entry in filter_visibility(remove_synthetic(find_unique_entries(sec)), ("public", "hidden")):
+    % if entry.enum:
+// ${ndk(entry.name) | csym}
+typedef enum acamera_metadata_enum_${csym(ndk(entry.name)).lower()} {
+      % for val in entry.enum.values:
+        % if val.id is None:
+    ${ndk(entry.name) | csym}_${val.name},
+        % else:
+    ${'%s_%s'%(csym(ndk(entry.name)), val.name) | pad(65)} = ${val.id},
+        % endif
+      % endfor
+} acamera_metadata_enum_${csym(entry.name).lower()}_t;
+
+    % endif
+  % endfor
+
+%endfor
+
+#endif //_NDK_CAMERA_METADATA_TAGS_H

@@ -127,6 +127,22 @@ def path_name(node):
 
   return ".".join((i.name for i in path))
 
+def ndk(name):
+  """
+  Return the NDK version of given name, which replace
+  the leading "android" to "acamera"
+
+  Args:
+    name: name string of an entry
+
+  Returns:
+    A NDK version name string of the input name
+  """
+  name_list = name.split(".")
+  if name_list[0] == "android":
+    name_list[0] = "acamera"
+  return ".".join(name_list)
+
 def has_descendants_with_enums(node):
   """
   Determine whether or not the current node is or has any descendants with an
