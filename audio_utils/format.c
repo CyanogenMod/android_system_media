@@ -155,6 +155,9 @@ void memcpy_by_audio_format(void *dst, audio_format_t dst_format,
             }
             return;
         }
+        case AUDIO_FORMAT_PCM_FLOAT:
+            memcpy_to_i32_from_float((int32_t*)dst, (float*)src, count);
+            return;
         default:
             break;
         }
