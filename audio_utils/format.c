@@ -135,26 +135,18 @@ void memcpy_by_audio_format(void *dst, audio_format_t dst_format,
         }
         break;
     case AUDIO_FORMAT_PCM_24_BIT_OFFLOAD: {
-        // pcm 24 bit with padding at LSB
-        // can assume LE?
-        size_t i;
-        uint8_t * src_ptr = (uint8_t *)src;
-        int32_t * dst_ptr = (int32_t *)dst;
         switch (src_format) {
         case AUDIO_FORMAT_PCM_24_BIT_PACKED: {
-            for (i = 0; i < count; i++) {
-                *dst_ptr++ = (int8_t)src_ptr[2] << 24 | src_ptr[1] << 16 | src_ptr[0] << 8;
-                src_ptr += 3;
-            }
+            memcpy_to_q8_23_from_p24((int32_t *)dst, (uint8_t *)src, count);
             return;
         }
-        case AUDIO_FORMAT_PCM_8_24_BIT: { // padding is at MSB
-            for (i = 0; i < count; i++) {
-                *dst_ptr++ = (int8_t)src_ptr[2] << 24 | src_ptr[1] << 16 | src_ptr[0] << 8;
-                src_ptr += 4;
-            }
+        case AUDIO_FORMAT_PCM_8_24_BIT: {
+            memcpy(dst, src, count * audio_bytes_per_sample(dst_format));
             return;
         }
+        case AUDIO_FORMAT_PCM_FLOAT:
+            memcpy_to_q8_23_from_float_with_clamp((int32_t*)dst, (float*)src, count);
+            return;
         default:
             break;
         }
