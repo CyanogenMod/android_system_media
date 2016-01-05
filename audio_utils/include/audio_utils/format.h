@@ -40,10 +40,15 @@ __BEGIN_DECLS
  * AUDIO_FORMAT_PCM_FLOAT, and the other format type is one of:
  *
  * AUDIO_FORMAT_PCM_16_BIT
+ * <BR>
  * AUDIO_FORMAT_PCM_FLOAT
+ * <BR>
  * AUDIO_FORMAT_PCM_8_BIT
+ * <BR>
  * AUDIO_FORMAT_PCM_24_BIT_PACKED
+ * <BR>
  * AUDIO_FORMAT_PCM_32_BIT
+ * <BR>
  * AUDIO_FORMAT_PCM_8_24_BIT
  *
  * 2) Both dst_format and src_format are identical and of the list given
