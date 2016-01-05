@@ -195,6 +195,13 @@ void memcpy_to_q8_23_from_i16(int32_t *dst, const int16_t *src, size_t count)
     }
 }
 
+void memcpy_to_q8_23_from_i32(int32_t *dst, const int32_t *src, size_t count)
+{
+    while (count--) {
+        *dst++ = clamp24(*src++);
+    }
+}
+
 void memcpy_to_q8_23_from_float_with_clamp(int32_t *dst, const float *src, size_t count)
 {
     while (count--) {

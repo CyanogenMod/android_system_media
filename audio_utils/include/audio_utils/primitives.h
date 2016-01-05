@@ -232,6 +232,17 @@ void memcpy_to_p24_from_i32(uint8_t *dst, const int32_t *src, size_t count);
  */
 void memcpy_to_q8_23_from_i16(int32_t *dst, const int16_t *src, size_t count);
 
+/* Shrink and copy samples from signed 32-bit fixed-point Q0.31
+ * to signed fixed-poing 32-bit Q8.23.
+ * Parameters:
+ *  dst     Destination buffer
+ *  src     Source buffer
+ *  count   Number of samples to copy
+ * The destination and source buffers must be completely separate.
+ */
+void memcpy_to_q8_23_from_i32(int32_t *dst, const int32_t *src, size_t count);
+
+
 /* Copy samples from single-precision floating-point to signed fixed-point 32-bit Q8.23.
  * This copy will clamp the Q8.23 representation to [0xff800000, 0x007fffff] even though there
  * are guard bits available. Fractional lsb is rounded to nearest, ties away from zero.
@@ -503,6 +514,17 @@ static inline int16_t clamp16(int32_t sample)
 {
     if ((sample>>15) ^ (sample>>31))
         sample = 0x7FFF ^ (sample>>31);
+    return sample;
+}
+
+/*
+ * Clamps a 24-bit value from a 32-bit sample
+ */
+static inline int32_t clamp24(int32_t sample)
+{
+    if ((sample>>23) ^ (sample>>31)) {
+        sample = 0x007FFFFF ^ (sample>>31);
+    }
     return sample;
 }
 
