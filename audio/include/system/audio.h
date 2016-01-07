@@ -28,6 +28,19 @@
 
 __BEGIN_DECLS
 
+/* The macro FCC_2 highlights places where there are 2-channel assumptions.
+ * This is typically due to legacy implementation of stereo input or output.
+ * Search also for "2", "left", "right", "[0]", "[1]", ">> 16", "<< 16", etc.
+ * Do not change this value.
+ */
+#define FCC_2 2     // FCC_2 = Fixed Channel Count 2
+
+/* The macro FCC_8 highlights places where there are 8-channel assumptions.
+ * This is typically due to audio mixer and resampler limitations.
+ * Do not change this value without verifying all locations that use it.
+ */
+#define FCC_8 8     // FCC_8 = Fixed Channel Count 8
+
 /* The enums were moved here mostly from
  * frameworks/base/include/media/AudioSystem.h
  */
