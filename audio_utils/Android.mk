@@ -7,6 +7,7 @@ LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES:= \
 	channels.c \
+	conversion.cpp \
 	fifo.c \
 	fixedfft.cpp.arm \
 	format.c \
