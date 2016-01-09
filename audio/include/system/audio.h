@@ -682,6 +682,9 @@ enum {
     AUDIO_DEVICE_OUT_SPEAKER_SAFE              = 0x400000,
     AUDIO_DEVICE_OUT_IP                        = 0x800000,
     AUDIO_DEVICE_OUT_PROXY                     = 0x1000000,
+#ifdef HAVE_LG_SWIRRC
+    AUDIO_DEVICE_OUT_IRRC                      = 0x4000000,
+#endif
     AUDIO_DEVICE_OUT_DEFAULT                   = AUDIO_DEVICE_BIT_DEFAULT,
     AUDIO_DEVICE_OUT_ALL      = (AUDIO_DEVICE_OUT_EARPIECE |
                                  AUDIO_DEVICE_OUT_SPEAKER |
@@ -708,6 +711,9 @@ enum {
                                  AUDIO_DEVICE_OUT_SPEAKER_SAFE |
                                  AUDIO_DEVICE_OUT_IP |
                                  AUDIO_DEVICE_OUT_PROXY |
+#ifdef HAVE_LG_SWIRRC
+                                 AUDIO_DEVICE_OUT_IRRC |
+#endif
                                  AUDIO_DEVICE_OUT_DEFAULT),
     AUDIO_DEVICE_OUT_ALL_A2DP = (AUDIO_DEVICE_OUT_BLUETOOTH_A2DP |
                                  AUDIO_DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
@@ -814,6 +820,9 @@ typedef enum {
                                          // start voip over voice path.
     AUDIO_OUTPUT_FLAG_COMPRESS_PASSTHROUGH = 0x1000, // flag for HDMI compressed passthrough
     AUDIO_OUTPUT_FLAG_DIRECT_PCM = 0x2000, // flag for Direct PCM
+#ifdef HAVE_LG_SWIRRC
+    AUDIO_OUTPUT_FLAG_IRRC = 0x10000, // flag for lge sw irrc.
+#endif
 } audio_output_flags_t;
 
 /* The audio input flags are analogous to audio output flags.
