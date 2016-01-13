@@ -25,6 +25,11 @@
 
 #define AUDIO_EFFECT_DEFAULT_CONFIG_FILE "/system/etc/audio_effects.conf"
 #define AUDIO_EFFECT_VENDOR_CONFIG_FILE "/vendor/etc/audio_effects.conf"
+
+// If the device ships a /vendor image which we can't modify but still want to
+// change the effects configuration from the default, we can load one from here
+#define AUDIO_EFFECT_VENDOR_CONFIG_FILE2 "/system/etc/audio_effects_vendor.conf"
+
 #define LIBRARIES_TAG "libraries"
 #define PATH_TAG "path"
 
