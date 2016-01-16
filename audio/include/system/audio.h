@@ -133,6 +133,7 @@ enum {
     AUDIO_FLAG_HW_HOTWORD                 = 0x20,
     AUDIO_FLAG_BYPASS_INTERRUPTION_POLICY = 0x40,
     AUDIO_FLAG_BYPASS_MUTE                = 0x80,
+    AUDIO_FLAG_LOW_LATENCY                = 0x100,
 };
 
 /* Do not change these values without updating their counterparts
