@@ -2703,7 +2703,70 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               devices will always support OFF, AUTO modes.
           </details>
         </entry>
+        <entry name="postRawSensitivityBoostRange" type="int32" visibility="public"
+            type_notes="Range of supported post RAW sensitivitiy boosts"
+            container="array" typedef="rangeInt">
+          <array>
+            <size>2</size>
+          </array>
+          <description>Range of boosts for android.control.postRawSensitivityBoost supported
+            by this camera device.
+          </description>
+          <units>ISO arithmetic units, the same as android.sensor.sensitivity</units>
+          <details>
+            Devices support post RAW sensitivity boost  will advertise
+            android.control.postRawSensitivityBoost key for controling
+            post RAW sensitivity boost.
+
+            This key will be `null` for devices that do not support any RAW format
+            outputs. For devices that do support RAW format outputs, this key will always
+            present, and if a device does not support post RAW sensitivity boost, it will
+            list `(100, 100)` in this key.
+          </details>
+          <hal_details>
+             This key is added in HAL3.4. For HAL3.3 or earlier devices, camera framework will
+             generate this key as `(100, 100)` if device supports any of RAW output formats.
+             All HAL3.4 and above devices should list this key if device supports any of RAW
+             output formats.
+          </hal_details>
+        </entry>
       </static>
+      <controls>
+        <entry name="postRawSensitivityBoost" type="int32" visibility="public">
+          <description>The amount of additional sesnsitivity boost applied to output images
+             after RAW sensor data is captured.
+          </description>
+          <units>ISO arithmetic units, the same as android.sensor.sensitivity</units>
+          <range>android.control.postRawSensitivityBoostRange</range>
+          <details>
+          Some camera devices support additional digital sensitivity boosting in the
+          camera processing pipeline after sensor RAW image is captured.
+          Such a boost will be applied to YUV/JPEG format output images but will not
+          have effect on RAW output formats like RAW_SENSOR, RAW10, RAW12 or RAW_OPAQUE.
+
+          This key is optional. Applications can assume there is no boost applied
+          after RAW is captured if this key is not available.
+          When this key is available, the sensitivity boost value must be within
+          android.control.postRawSensitivityBoost.
+
+          If the camera device cannot apply the exact boost requested, it will reduce the
+          boost to the nearest supported value.
+          The final boost value used will be available in the output capture result.
+
+          For devices that support post RAW sensitivity boost, the YUV/JPEG output images
+          of such device will have the total sensitivity of
+          `android.sensor.sensitivity * android.control.ispSensitivity / 100`
+          The sensitivity of RAW format images will always be `android.sensor.sensitivity`
+
+          This control is only effective if android.control.aeMode or android.control.mode is set to
+          OFF; otherwise the auto-exposure algorithm will override this value.
+          </details>
+        </entry>
+      </controls>
+      <dynamic>
+        <clone entry="android.control.postRawSensitivityBoost" kind="controls">
+        </clone>
+      </dynamic>
     </section>
     <section name="demosaic">
       <controls>
@@ -5903,6 +5966,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           requested, it will reduce the gain to the nearest supported
           value. The final sensitivity used will be available in the
           output capture result.
+
+          This control is only effective if android.control.aeMode or android.control.mode is set to
+          OFF; otherwise the auto-exposure algorithm will override this value.
           </details>
           <hal_details>ISO 12232:2006 REI method is acceptable.</hal_details>
           <tag id="V1" />
