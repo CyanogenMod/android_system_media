@@ -254,8 +254,9 @@ typedef enum {
 } audio_format_vorbis_sub_fmt_t;
 
 
-/* Audio format consists of a main format field (upper 8 bits) and a sub format
- * field (lower 24 bits).
+/* Audio format  is a 32-bit word that consists of:
+ *   main format field (upper 8 bits)
+ *   sub format field (lower 24 bits).
  *
  * The main format indicates the main codec type. The sub format field
  * indicates options and parameters for each format. The sub format is mainly
@@ -279,7 +280,9 @@ typedef enum {
     AUDIO_FORMAT_E_AC3               = 0x0A000000UL,
     AUDIO_FORMAT_DTS                 = 0x0B000000UL,
     AUDIO_FORMAT_DTS_HD              = 0x0C000000UL,
-    AUDIO_FORMAT_MAIN_MASK           = 0xFF000000UL,
+    // IEC61937 is encoded audio wrapped in 16-bit PCM.
+    AUDIO_FORMAT_IEC61937            = 0x0D000000UL,
+    AUDIO_FORMAT_MAIN_MASK           = 0xFF000000UL, /* Deprecated. Use audio_get_main_format() */
     AUDIO_FORMAT_SUB_MASK            = 0x00FFFFFFUL,
 
     /* Aliases */
@@ -1382,15 +1385,44 @@ static inline bool audio_is_valid_format(audio_format_t format)
     case AUDIO_FORMAT_E_AC3:
     case AUDIO_FORMAT_DTS:
     case AUDIO_FORMAT_DTS_HD:
+    case AUDIO_FORMAT_IEC61937:
         return true;
     default:
         return false;
     }
 }
 
+/**
+ * Extract the primary format, eg. PCM, AC3, etc.
+ */
+static inline audio_format_t audio_get_main_format(audio_format_t format)
+{
+    return (audio_format_t)(format & AUDIO_FORMAT_MAIN_MASK);
+}
+
+/**
+ * Is the data plain PCM samples that can be scaled and mixed?
+ */
 static inline bool audio_is_linear_pcm(audio_format_t format)
 {
-    return ((format & AUDIO_FORMAT_MAIN_MASK) == AUDIO_FORMAT_PCM);
+    return (audio_get_main_format(format) == AUDIO_FORMAT_PCM);
+}
+
+/**
+ * For this format, is the number of PCM audio frames directly proportional
+ * to the number of data bytes?
+ *
+ * In other words, is the format transported as PCM audio samples,
+ * but not necessarily scalable or mixable.
+ * This returns true for real PCM, but also for AUDIO_FORMAT_IEC61937,
+ * which is transported as 16 bit PCM audio, but where the encoded data
+ * cannot be mixed or scaled.
+ */
+static inline bool audio_has_proportional_frames(audio_format_t format)
+{
+    audio_format_t mainFormat = audio_get_main_format(format);
+    return (mainFormat == AUDIO_FORMAT_PCM
+            || mainFormat == AUDIO_FORMAT_IEC61937);
 }
 
 static inline size_t audio_bytes_per_sample(audio_format_t format)
@@ -1406,6 +1438,7 @@ static inline size_t audio_bytes_per_sample(audio_format_t format)
         size = sizeof(uint8_t) * 3;
         break;
     case AUDIO_FORMAT_PCM_16_BIT:
+    case AUDIO_FORMAT_IEC61937:
         size = sizeof(int16_t);
         break;
     case AUDIO_FORMAT_PCM_8_BIT:
