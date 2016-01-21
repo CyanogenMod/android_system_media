@@ -2476,6 +2476,10 @@ int camera_metadata_enum_snprint(uint32_t tag,
                     msg = "LEGACY";
                     ret = 0;
                     break;
+                case ANDROID_INFO_SUPPORTED_HARDWARE_LEVEL_3:
+                    msg = "3";
+                    ret = 0;
+                    break;
                 default:
                     msg = "error: enum value out of range";
             }
