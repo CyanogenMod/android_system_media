@@ -158,6 +158,8 @@ typedef enum camera_metadata_tag {
     ANDROID_CONTROL_AE_LOCK_AVAILABLE,                // enum         | public
     ANDROID_CONTROL_AWB_LOCK_AVAILABLE,               // enum         | public
     ANDROID_CONTROL_AVAILABLE_MODES,                  // byte[]       | public
+    ANDROID_CONTROL_POST_RAW_SENSITIVITY_BOOST_RANGE, // int32[]      | public
+    ANDROID_CONTROL_POST_RAW_SENSITIVITY_BOOST,       // int32        | public
     ANDROID_CONTROL_END,
 
     ANDROID_DEMOSAIC_MODE =                           // enum         | system
