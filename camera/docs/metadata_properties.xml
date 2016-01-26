@@ -8290,19 +8290,96 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <value>
               LIMITED
               <notes>
-              This camera device has only limited capabilities.
+              This camera device does not have enough capabilities to qualify as a `FULL` device or
+              better.
+
+              Only the stream configurations listed in the `LEGACY` and `LIMITED` tables in the
+              {@link android.hardware.camera2.CameraDevice#createCaptureSession
+              createCaptureSession} documentation are guaranteed to be supported.
+
+              All `LIMITED` devices support the `BACKWARDS_COMPATIBLE` capability, indicating basic
+              support for color image capture. The only exception is that the device may
+              alternatively support only the `DEPTH_OUTPUT` capability, if it can only output depth
+              measurements and not color images.
+
+              `LIMITED` devices and above require the use of android.control.aePrecaptureTrigger
+              to lock exposure metering (and calculate flash power, for cameras with flash) before
+              capturing a high-quality still image.
+
+              A `LIMITED` device that only lists the `BACKWARDS_COMPATIBLE` capability is only
+              required to support full-automatic operation and post-processing (`OFF` is not
+              supported for android.control.aeMode, android.control.afMode, or
+              android.control.awbMode)
+
+              Additional capabilities may optionally be supported by a `LIMITED`-level device, and
+              can be checked for in android.request.availableCapabilities.
               </notes>
             </value>
             <value>
               FULL
               <notes>
               This camera device is capable of supporting advanced imaging applications.
+
+              The stream configurations listed in the `FULL`, `LEGACY` and `LIMITED` tables in the
+              {@link android.hardware.camera2.CameraDevice#createCaptureSession
+              createCaptureSession} documentation are guaranteed to be supported.
+
+              A `FULL` device will support below capabilities:
+
+              * `BURST_CAPTURE` capability (android.request.availableCapabilities contains
+                `BURST_CAPTURE`)
+              * Per frame control (android.sync.maxLatency `==` PER_FRAME_CONTROL)
+              * Manual sensor control (android.request.availableCapabilities contains `MANUAL_SENSOR`)
+              * Manual post-processing control (android.request.availableCapabilities contains
+                `MANUAL_POST_PROCESSING`)
+              * The required exposure time range defined in android.sensor.info.exposureTimeRange
+              * The required maxFrameDuration defined in android.sensor.info.maxFrameDuration
+
+              Note:
+              Pre-API level 23, FULL devices also supported arbitrary cropping region
+              (android.scaler.croppingType `== FREEFORM`); this requirement was relaxed in API level
+              23, and `FULL` devices may only support `CENTERED` cropping.
               </notes>
             </value>
             <value>
               LEGACY
               <notes>
               This camera device is running in backward compatibility mode.
+
+              Only the stream configurations listed in the `LEGACY` table in the {@link
+              android.hardware.camera2.CameraDevice#createCaptureSession createCaptureSession}
+              documentation are supported.
+
+              A `LEGACY` device does not support per-frame control, manual sensor control, manual
+              post-processing, arbitrary cropping regions, and has relaxed performance constraints.
+              No additional capabilities beyond `BACKWARD_COMPATIBLE` will ever be listed by a
+              `LEGACY` device in android.request.availableCapabilities.
+
+              In addition, the android.control.aePrecaptureTrigger is not functional on `LEGACY`
+              devices. Instead, every request that includes a JPEG-format output target is treated
+              as triggering a still capture, internally executing a precapture trigger.  This may
+              fire the flash for flash power metering during precapture, and then fire the flash
+              for the final capture, if a flash is available on the device and the AE mode is set to
+              enable the flash.
+              </notes>
+            </value>
+            <value>
+              3
+              <notes>
+              This camera device is capable of YUV reprocessing and RAW data capture, in addition to
+              FULL-level capabilities.
+
+              The stream configurations listed in the `LEVEL_3`, `RAW`, `FULL`, `LEGACY` and
+              `LIMITED` tables in the {@link
+              android.hardware.camera2.CameraDevice#createCaptureSession createCaptureSession}
+              documentation are guaranteed to be supported.
+
+              The following additional capabilities are guaranteed to be supported:
+
+              * `YUV_REPROCESSING` capability (android.request.availableCapabilities contains
+                `YUV_REPROCESSING`)
+              * `RAW` capability (android.request.availableCapabilities contains
+                `RAW`)
               </notes>
             </value>
           </enum>
@@ -8310,23 +8387,41 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           Generally classifies the overall set of the camera device functionality.
           </description>
           <details>
-          Camera devices will come in three flavors: LEGACY, LIMITED and FULL.
+          The supported hardware level is a high-level description of the camera device's
+          capabilities, summarizing several capabilities into one field.  Each level adds additional
+          features to the previous one, and is always a strict superset of the previous level.
+          The ordering is `LEGACY &lt; LIMITED &lt; FULL &lt; LEVEL_3`.
 
-          A FULL device will support below capabilities:
+          Starting from `LEVEL_3`, the level enumerations are guaranteed to be in increasing
+          numerical value as well. To check if a given device is at least at a given hardware level,
+          the following code snippet can be used:
 
-          * BURST_CAPTURE capability (android.request.availableCapabilities contains BURST_CAPTURE)
-          * Per frame control (android.sync.maxLatency `==` PER_FRAME_CONTROL)
-          * Manual sensor control (android.request.availableCapabilities contains MANUAL_SENSOR)
-          * Manual post-processing control (android.request.availableCapabilities contains
-            MANUAL_POST_PROCESSING)
-          * At least 3 processed (but not stalling) format output streams
-            (android.request.maxNumOutputProc `&gt;=` 3)
-          * The required stream configurations defined in android.scaler.availableStreamConfigurations
-          * The required exposure time range defined in android.sensor.info.exposureTimeRange
-          * The required maxFrameDuration defined in android.sensor.info.maxFrameDuration
+              // Returns true if the device supports the required hardware level, or better.
+              boolean isHardwareLevelSupported(CameraCharacteristics c, int requiredLevel) {
+                  int deviceLevel = c.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
+                  if (deviceLevel == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY) {
+                      return requiredLevel == deviceLevel;
+                  }
+                  // deviceLevel is not LEGACY, can use numerical sort
+                  return requiredLevel &lt;= deviceLevel;
+              }
 
-          A LIMITED device may have some or none of the above characteristics.
-          To find out more refer to android.request.availableCapabilities.
+          At a high level, the levels are:
+
+          * `LEGACY` devices operate in a backwards-compatibility mode for older
+            Android devices, and have very limited capabilities.
+          * `LIMITED` devices represent the
+            baseline feature set, and may also include additional capabilities that are
+            subsets of `FULL`.
+          * `FULL` devices additionally support per-frame manual control of sensor, flash, lens and
+            post-processing settings, and image capture at a high rate.
+          * `LEVEL_3` devices additionally support YUV reprocessing and RAW image capture, along
+            with additional output stream configurations.
+
+          See the individual level enums for full descriptions of the supported capabilities.  The
+          android.request.availableCapabilities entry describes the device's capabilities at a
+          finer-grain level, if needed. In addition, many controls have their available settings or
+          ranges defined in individual {@link android.hardware.camera2.CameraCharacteristics} entries.
 
           Some features are not part of any particular hardware level or capability and must be
           queried separately. These include:
@@ -8338,31 +8433,21 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             (android.lens.info.availableOpticalStabilization,
              android.control.availableVideoStabilizationModes)
 
-          A LEGACY device does not support per-frame control, manual sensor control, manual
-          post-processing, arbitrary cropping regions, and has relaxed performance constraints.
-
-          Each higher level supports everything the lower level supports
-          in this order: FULL `&gt;` LIMITED `&gt;` LEGACY.
-
-          Note:
-          Pre-API level 23, FULL devices also supported arbitrary cropping region
-          (android.scaler.croppingType `==` FREEFORM); this requirement was relaxed in API level 23,
-          and FULL devices may only support CENTERED cropping.
           </details>
           <hal_details>
-          The camera 3 HAL device can implement one of two possible
-          operational modes; limited and full. Full support is
-          expected from new higher-end devices. Limited mode has
-          hardware requirements roughly in line with those for a
-          camera HAL device v1 implementation, and is expected from
-          older or inexpensive devices. Full is a strict superset of
-          limited, and they share the same essential operational flow.
+          The camera 3 HAL device can implement one of three possible operational modes; LIMITED,
+          FULL, and LEVEL_3.
+
+          FULL support or better is expected from new higher-end devices. Limited
+          mode has hardware requirements roughly in line with those for a camera HAL device v1
+          implementation, and is expected from older or inexpensive devices. Each level is a strict
+          superset of the previous level, and they share the same essential operational flow.
 
           For full details refer to "S3. Operational Modes" in camera3.h
 
-          Camera HAL3+ must not implement LEGACY mode. It is there
-          for backwards compatibility in the `android.hardware.camera2`
-          user-facing API only.
+          Camera HAL3+ must not implement LEGACY mode. It is there for backwards compatibility in
+          the `android.hardware.camera2` user-facing API only on HALv1 devices, and is implemented
+          by the camera framework code.
           </hal_details>
         </entry>
       </static>
@@ -8620,7 +8705,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           Use `frame_count` from camera3_request_t instead of
           android.request.frameCount or
-          `@link{android.hardware.camera2.CaptureResult#getFrameNumber}`.
+          `{@link android.hardware.camera2.CaptureResult#getFrameNumber}`.
 
           LIMITED devices are strongly encouraged to use a non-negative
           value. If UNKNOWN is used here then app developers do not have a way

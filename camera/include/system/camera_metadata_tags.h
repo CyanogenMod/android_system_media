@@ -886,6 +886,7 @@ typedef enum camera_metadata_enum_android_info_supported_hardware_level {
     ANDROID_INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED,
     ANDROID_INFO_SUPPORTED_HARDWARE_LEVEL_FULL,
     ANDROID_INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY,
+    ANDROID_INFO_SUPPORTED_HARDWARE_LEVEL_3,
 } camera_metadata_enum_android_info_supported_hardware_level_t;
 
 
