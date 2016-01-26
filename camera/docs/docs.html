@@ -4182,13 +4182,13 @@ have effect on RAW output formats like RAW_<wbr/>SENSOR,<wbr/> RAW10,<wbr/> RAW1
 <p>This key is optional.<wbr/> Applications can assume there is no boost applied
 after RAW is captured if this key is not available.<wbr/>
 When this key is available,<wbr/> the sensitivity boost value must be within
-<a href="#controls_android.control.postRawSensitivityBoost">android.<wbr/>control.<wbr/>post<wbr/>Raw<wbr/>Sensitivity<wbr/>Boost</a>.<wbr/></p>
+<a href="#static_android.control.postRawSensitivityBoostRange">android.<wbr/>control.<wbr/>post<wbr/>Raw<wbr/>Sensitivity<wbr/>Boost<wbr/>Range</a>.<wbr/></p>
 <p>If the camera device cannot apply the exact boost requested,<wbr/> it will reduce the
 boost to the nearest supported value.<wbr/>
 The final boost value used will be available in the output capture result.<wbr/></p>
 <p>For devices that support post RAW sensitivity boost,<wbr/> the YUV/<wbr/>JPEG output images
 of such device will have the total sensitivity of
-<code><a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a> * android.<wbr/>control.<wbr/>isp<wbr/>Sensitivity /<wbr/> 100</code>
+<code><a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a> * <a href="#controls_android.control.postRawSensitivityBoost">android.<wbr/>control.<wbr/>post<wbr/>Raw<wbr/>Sensitivity<wbr/>Boost</a> /<wbr/> 100</code>
 The sensitivity of RAW format images will always be <code><a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a></code></p>
 <p>This control is only effective if <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> or <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> is set to
 OFF; otherwise the auto-exposure algorithm will override this value.<wbr/></p>
@@ -8801,13 +8801,13 @@ have effect on RAW output formats like RAW_<wbr/>SENSOR,<wbr/> RAW10,<wbr/> RAW1
 <p>This key is optional.<wbr/> Applications can assume there is no boost applied
 after RAW is captured if this key is not available.<wbr/>
 When this key is available,<wbr/> the sensitivity boost value must be within
-<a href="#controls_android.control.postRawSensitivityBoost">android.<wbr/>control.<wbr/>post<wbr/>Raw<wbr/>Sensitivity<wbr/>Boost</a>.<wbr/></p>
+<a href="#static_android.control.postRawSensitivityBoostRange">android.<wbr/>control.<wbr/>post<wbr/>Raw<wbr/>Sensitivity<wbr/>Boost<wbr/>Range</a>.<wbr/></p>
 <p>If the camera device cannot apply the exact boost requested,<wbr/> it will reduce the
 boost to the nearest supported value.<wbr/>
 The final boost value used will be available in the output capture result.<wbr/></p>
 <p>For devices that support post RAW sensitivity boost,<wbr/> the YUV/<wbr/>JPEG output images
 of such device will have the total sensitivity of
-<code><a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a> * android.<wbr/>control.<wbr/>isp<wbr/>Sensitivity /<wbr/> 100</code>
+<code><a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a> * <a href="#controls_android.control.postRawSensitivityBoost">android.<wbr/>control.<wbr/>post<wbr/>Raw<wbr/>Sensitivity<wbr/>Boost</a> /<wbr/> 100</code>
 The sensitivity of RAW format images will always be <code><a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a></code></p>
 <p>This control is only effective if <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> or <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> is set to
 OFF; otherwise the auto-exposure algorithm will override this value.<wbr/></p>
