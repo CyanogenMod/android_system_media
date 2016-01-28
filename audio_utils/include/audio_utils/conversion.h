@@ -29,17 +29,19 @@ __BEGIN_DECLS
 /**
  * In-place mono blend using the arithmetic average of the channels in each audio frame.
  *
- *   \param buf          buffer of samples
+ *   \param buf          buffer of frames
  *   \param format       one of AUDIO_FORMAT_PCM_16_BIT or AUDIO_FORMAT_PCM_FLOAT
  *   \param channelCount number of channels per frame
  *   \param frames       number of frames in buffer
+ *   \param limit        whether to use a limiter (experimental, currently only for stereo float)
  *
  * \return
  *   none
  *
  */
 
-void mono_blend(void *buf, audio_format_t format, size_t channelCount, size_t frames);
+void mono_blend(void *buf, audio_format_t format, size_t channelCount, size_t frames,
+        bool limit = false);
 
 /** \cond */
 __END_DECLS

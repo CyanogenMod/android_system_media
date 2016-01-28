@@ -35,3 +35,10 @@ LOCAL_C_INCLUDES := $(call include-path-for, audio-utils)
 # libmedia libbinder libcutils libutils
 LOCAL_STATIC_LIBRARIES := libsndfile libaudioutils liblog
 include $(BUILD_HOST_EXECUTABLE)
+
+include $(CLEAR_VARS)
+LOCAL_SRC_FILES := limiter_tests.c
+LOCAL_MODULE := limiter_tests
+LOCAL_C_INCLUDES := $(call include-path-for, audio-utils)
+LOCAL_STATIC_LIBRARIES := libaudioutils
+include $(BUILD_HOST_EXECUTABLE)

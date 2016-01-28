@@ -17,11 +17,16 @@
 //#define LOG_NDEBUG 0
 #define LOG_TAG "audio_utils_conversion"
 
+#include <math.h>
 #include <audio_utils/conversion.h>
 #include <utils/Log.h>
+#include <audio_utils/limiter.h>
 
 // TODO: Speed up for special case of 2 channels?
-void mono_blend(void *buf, audio_format_t format, size_t channelCount, size_t frames) {
+void mono_blend(void *buf, audio_format_t format, size_t channelCount, size_t frames, bool limit) {
+    if (channelCount < 2) {
+        return;
+    }
     switch (format) {
     case AUDIO_FORMAT_PCM_16_BIT: {
         int16_t *out = (int16_t *)buf;
@@ -46,7 +51,11 @@ void mono_blend(void *buf, audio_format_t format, size_t channelCount, size_t fr
             for (size_t j = 0; j < channelCount; ++j) {
                 accum += *in++;
             }
-            accum *= recipdiv;
+            if (limit && channelCount == 2) {
+                accum = limiter(accum * M_SQRT1_2);
+            } else {
+                accum *= recipdiv;
+            }
             for (size_t j = 0; j < channelCount; ++j) {
                 *out++ = accum;
             }
