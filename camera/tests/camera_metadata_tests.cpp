@@ -300,7 +300,7 @@ TEST(camera_metadata, add_get_normal) {
     result = get_camera_metadata_entry(m,
             index, &entry);
     EXPECT_EQ(OK, result);
-    EXPECT_EQ(index, (int)entry.index);
+    EXPECT_EQ(index, entry.index);
     EXPECT_EQ(ANDROID_SENSOR_EXPOSURE_TIME, entry.tag);
     EXPECT_EQ(TYPE_INT64, entry.type);
     EXPECT_EQ((size_t)1, entry.count);
@@ -1780,7 +1780,7 @@ TEST(camera_metadata, memcpy) {
 
     EXPECT_EQ(OK, validate_camera_metadata_structure(m2, &m_size));
 
-    delete dst;
+    delete[] dst;
     FINISH_USING_CAMERA_METADATA(m);
 }
 
