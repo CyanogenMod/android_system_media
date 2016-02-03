@@ -11,6 +11,7 @@ LOCAL_SRC_FILES:= \
 	fifo.c \
 	fixedfft.cpp.arm \
 	format.c \
+	limiter.c \
 	minifloat.c \
 	primitives.c \
 	resampler.c \
@@ -36,6 +37,7 @@ LOCAL_SRC_FILES := \
 	channels.c \
 	fifo.c \
 	format.c \
+	limiter.c \
 	minifloat.c \
 	primitives.c \
 	roundup.c
