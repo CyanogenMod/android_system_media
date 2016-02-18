@@ -846,6 +846,19 @@ static const audio_config_t AUDIO_CONFIG_INITIALIZER = {
     frame_count: 0,
 };
 
+struct audio_config_base {
+    uint32_t sample_rate;
+    audio_channel_mask_t channel_mask;
+    audio_format_t  format;
+};
+
+typedef struct audio_config_base audio_config_base_t;
+
+static const audio_config_base_t AUDIO_CONFIG_BASE_INITIALIZER = {
+    sample_rate: 0,
+    channel_mask: AUDIO_CHANNEL_NONE,
+    format: AUDIO_FORMAT_DEFAULT
+};
 
 /* audio hw module handle functions or structures referencing a module */
 typedef int audio_module_handle_t;
