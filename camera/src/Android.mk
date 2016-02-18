@@ -18,7 +18,8 @@ LOCAL_MODULE_TAGS := optional
 
 LOCAL_CFLAGS += \
 	-Wall \
-	-Wno-unused-parameter \
+	-Wextra \
+	-Werror \
 	-fvisibility=hidden \
 	-std=c99
 

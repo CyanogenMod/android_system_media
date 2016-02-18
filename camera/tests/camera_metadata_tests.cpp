@@ -462,8 +462,6 @@ TEST(camera_metadata, copy_metadata) {
     const size_t entry_capacity = 50;
     const size_t data_capacity = 450;
 
-    int result;
-
     m = allocate_camera_metadata(entry_capacity, data_capacity);
 
     add_test_metadata(m, entry_capacity);
@@ -516,8 +514,6 @@ TEST(camera_metadata, copy_metadata_extraspace) {
     const size_t data_capacity = 100;
 
     const size_t extra_space = 10;
-
-    int result;
 
     m = allocate_camera_metadata(entry_capacity, data_capacity);
 
@@ -574,8 +570,6 @@ TEST(camera_metadata, copy_metadata_nospace) {
     camera_metadata_t *m = NULL;
     const size_t entry_capacity = 5;
     const size_t data_capacity = 50;
-
-    int result;
 
     m = allocate_camera_metadata(entry_capacity, data_capacity);
 

@@ -823,6 +823,7 @@ int get_camera_metadata_tag_type(uint32_t tag) {
 
 int set_camera_metadata_vendor_tag_ops(const vendor_tag_query_ops_t* ops) {
     // **DEPRECATED**
+    (void) ops;
     ALOGE("%s: This function has been deprecated", __FUNCTION__);
     return ERROR;
 }
