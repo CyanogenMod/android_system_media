@@ -143,6 +143,70 @@ def ndk(name):
     name_list[0] = "acamera"
   return ".".join(name_list)
 
+def protobuf_type(entry):
+  """
+  Return the protocol buffer message type for input metadata entry.
+  Only support types used by static metadata right now
+
+  Returns:
+    A string of protocol buffer type. Ex: "optional int32" or "repeated RangeInt"
+  """
+  typeName = None
+  if entry.typedef is None:
+    typeName = entry.type
+  else:
+    typeName = entry.typedef.name
+
+  typename_to_protobuftype = {
+    "rational"               : "Rational",
+    "size"                   : "Size",
+    "sizeF"                  : "SizeF",
+    "rectangle"              : "Rect",
+    "streamConfigurationMap" : "StreamConfigurations",
+    "rangeInt"               : "RangeInt",
+    "rangeLong"              : "RangeLong",
+    "colorSpaceTransform"    : "ColorSpaceTransform",
+    "blackLevelPattern"      : "BlackLevelPattern",
+    "byte"                   : "int32", # protocol buffer don't support byte
+    "boolean"                : "bool",
+    "float"                  : "float",
+    "double"                 : "double",
+    "int32"                  : "int32",
+    "int64"                  : "int64",
+    "enumList"               : "int32"
+  }
+
+  if typeName not in typename_to_protobuftype:
+    print >> sys.stderr,\
+      "  ERROR: Could not find protocol buffer type for {%s} type {%s} typedef {%s}" % \
+          (entry.name, entry.type, entry.typedef)
+
+  proto_type = typename_to_protobuftype[typeName]
+
+  prefix = "optional"
+  if entry.container == 'array':
+    has_variable_size = False
+    for size in entry.container_sizes:
+      try:
+        size_int = int(size)
+      except ValueError:
+        has_variable_size = True
+
+    if has_variable_size:
+      prefix = "repeated"
+
+  return "%s %s" %(prefix, proto_type)
+
+
+def protobuf_name(entry):
+  """
+  Return the protocol buffer field name for input metadata entry
+
+  Returns:
+    A string. Ex: "android_colorCorrection_availableAberrationModes"
+  """
+  return entry.name.replace(".", "_")
+
 def has_descendants_with_enums(node):
   """
   Determine whether or not the current node is or has any descendants with an
