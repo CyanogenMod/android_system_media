@@ -200,9 +200,34 @@ typedef enum {
     AUDIO_SESSION_ALLOCATE = 0,
 } audio_session_t;
 
-/* a unique ID allocated by AudioFlinger for use as a audio_io_handle_t or audio_session_t */
+/* a unique ID allocated by AudioFlinger for use as an audio_io_handle_t, audio_session_t,
+ * effect ID (int), audio_module_handle_t, and audio_patch_handle_t.
+ * Audio port IDs (audio_port_handle_t) are allocated by AudioPolicy
+ * in a different namespace than AudioFlinger unique IDs.
+ */
 typedef int audio_unique_id_t;
 
+/* Possible uses for an audio_unique_id_t */
+typedef enum {
+    AUDIO_UNIQUE_ID_USE_UNSPECIFIED = 0,
+    AUDIO_UNIQUE_ID_USE_SESSION = 1,
+    AUDIO_UNIQUE_ID_USE_MODULE = 2,
+    AUDIO_UNIQUE_ID_USE_EFFECT = 3,
+    AUDIO_UNIQUE_ID_USE_PATCH = 4,
+    AUDIO_UNIQUE_ID_USE_OUTPUT = 5,
+    AUDIO_UNIQUE_ID_USE_INPUT = 6,
+    // 7 is available
+    AUDIO_UNIQUE_ID_USE_MAX = 8,  // must be a power-of-two
+    AUDIO_UNIQUE_ID_USE_MASK = AUDIO_UNIQUE_ID_USE_MAX - 1
+} audio_unique_id_use_t;
+
+/* Return the use of an audio_unique_id_t */
+static inline audio_unique_id_use_t audio_unique_id_get_use(audio_unique_id_t id)
+{
+    return (audio_unique_id_use_t) (id & AUDIO_UNIQUE_ID_USE_MASK);
+}
+
+/* Reserved audio_unique_id_t values.  FIXME: not a complete list. */
 #define AUDIO_UNIQUE_ID_ALLOCATE AUDIO_SESSION_ALLOCATE
 
 /* Audio sub formats (see enum audio_format). */
