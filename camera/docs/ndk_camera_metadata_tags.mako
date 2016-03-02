@@ -63,27 +63,23 @@ typedef enum acamera_metadata_section_start {
  */
 typedef enum acamera_metadata_tag {
     % for sec in find_all_sections(metadata):
+<%
+      entries = remove_synthetic(find_unique_entries(sec))
+      skip_sec = all(e.applied_visibility == "system" for e in entries)
+      if skip_sec:
+        continue
+%>\
       % for idx,entry in enumerate(remove_synthetic(find_unique_entries(sec))):
-        % if idx == 0:
-          % if entry.applied_visibility != "system":
-            % if entry.deprecated:
+        % if entry.applied_visibility != "system":
+          % if entry.deprecated:
     ${ndk(entry.name) + " = " | csym,ljust(60)}// Deprecated! DO NOT USE
-            % else:
+          % else:
     ${ndk(entry.name) + " = " | csym,ljust(60)}// ${annotated_type(entry)}
-            % endif
-          % else:
-    ${ndk(path_name(find_parent_section(entry))) | csym}_RESERVED_${idx} =
           % endif
+          % if idx == 0:
             ${ndk(path_name(find_parent_section(entry))) | csym}_START,
-        % else:
-          % if entry.applied_visibility != "system":
-            % if entry.deprecated:
-    ${ndk(entry.name) + "," | csym,ljust(60)}// Deprecated! DO NOT USE
-            % else:
-    ${ndk(entry.name) + "," | csym,ljust(60)}// ${annotated_type(entry)}
-            % endif
           % else:
-    ${ndk(path_name(find_parent_section(entry))) | csym}_RESERVED_${idx},
+            ${ndk(path_name(find_parent_section(entry))) | csym}_START + ${idx},
           % endif
         % endif
       % endfor
