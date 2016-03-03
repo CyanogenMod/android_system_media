@@ -62,6 +62,17 @@ ${single_kind_keys("controls")}\
     }
 }
 
+// System tags that should be hidden from users
+std::unordered_set<uint32_t> ACameraMetadata::sSystemTags ({
+    % for sec in find_all_sections(metadata):
+      % for entry in remove_synthetic(find_unique_entries(sec)):
+        % if entry.applied_visibility == "system":
+    ${entry.name | csym},
+        % endif
+      % endfor
+    %endfor
+});
+
 /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
  * End generated code
  *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~O@*/
