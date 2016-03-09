@@ -1737,6 +1737,20 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               remain active when FACE_PRIORITY_LOW_LIGHT is set.
               </notes>
             </value>
+            <value optional="true" hidden="true" id="100">DEVICE_CUSTOM_START
+              <notes>
+                Scene mode values within the range of
+                `[DEVICE_CUSTOM_START, DEVICE_CUSTOM_END]` are reserved for device specific
+                customized scene modes.
+              </notes>
+            </value>
+            <value optional="true" hidden="true" id="127">DEVICE_CUSTOM_END
+              <notes>
+                Scene mode values within the range of
+                `[DEVICE_CUSTOM_START, DEVICE_CUSTOM_END]` are reserved for device specific
+                customized scene modes.
+              </notes>
+            </value>
           </enum>
           <description>
           Control for which scene mode is currently active.

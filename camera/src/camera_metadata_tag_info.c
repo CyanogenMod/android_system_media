@@ -1149,6 +1149,14 @@ int camera_metadata_enum_snprint(uint32_t tag,
                     msg = "FACE_PRIORITY_LOW_LIGHT";
                     ret = 0;
                     break;
+                case ANDROID_CONTROL_SCENE_MODE_DEVICE_CUSTOM_START:
+                    msg = "DEVICE_CUSTOM_START";
+                    ret = 0;
+                    break;
+                case ANDROID_CONTROL_SCENE_MODE_DEVICE_CUSTOM_END:
+                    msg = "DEVICE_CUSTOM_END";
+                    ret = 0;
+                    break;
                 default:
                     msg = "error: enum value out of range";
             }
