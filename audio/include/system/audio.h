@@ -900,7 +900,9 @@ static const audio_config_base_t AUDIO_CONFIG_BASE_INITIALIZER = {
 };
 
 /* audio hw module handle functions or structures referencing a module */
-typedef int audio_module_handle_t;
+typedef enum {
+    AUDIO_MODULE_HANDLE_NONE = 0,
+} audio_module_handle_t;
 
 /******************************
  *  Volume control
@@ -1107,8 +1109,9 @@ struct audio_port {
  * But the same patch receives another system wide unique handle allocated by the framework.
  * This unique handle is used for all transactions inside the framework.
  */
-typedef int audio_patch_handle_t;
-#define AUDIO_PATCH_HANDLE_NONE 0
+typedef enum {
+    AUDIO_PATCH_HANDLE_NONE = 0,
+} audio_patch_handle_t;
 
 #define AUDIO_PATCH_PORTS_MAX   16
 
