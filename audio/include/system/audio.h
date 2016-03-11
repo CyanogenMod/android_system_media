@@ -77,6 +77,8 @@ typedef enum {
     AUDIO_STREAM_REROUTING        = 11, /* For dynamic policy output mixes */
     AUDIO_STREAM_PATCH            = 12, /* For internal audio flinger tracks. Fixed volume */
     AUDIO_STREAM_PUBLIC_CNT       = AUDIO_STREAM_TTS + 1,
+    AUDIO_STREAM_FOR_POLICY_CNT   = AUDIO_STREAM_PATCH, /* number of streams considered by
+                                           audio policy for volume and routing */
     AUDIO_STREAM_CNT              = AUDIO_STREAM_PATCH + 1,
 } audio_stream_type_t;
 
