@@ -4325,17 +4325,24 @@ this camera device.<wbr/></p>
             <td class="entry_details" colspan="5">
               <p>For devices at the LEGACY level or above:</p>
 <ul>
-<li>This list will always include (30,<wbr/> 30).<wbr/></li>
-<li>Also,<wbr/> for constant-framerate recording,<wbr/> for each normal
+<li>
+<p>For constant-framerate recording,<wbr/> for each normal
+<a href="https://developer.android.com/reference/android/media/CamcorderProfile.html">CamcorderProfile</a>,<wbr/> that is,<wbr/> a
 <a href="https://developer.android.com/reference/android/media/CamcorderProfile.html">CamcorderProfile</a> that has
 <a href="https://developer.android.com/reference/android/media/CamcorderProfile.html#quality">quality</a> in
 the range [<a href="https://developer.android.com/reference/android/media/CamcorderProfile.html#QUALITY_LOW">QUALITY_<wbr/>LOW</a>,<wbr/>
 <a href="https://developer.android.com/reference/android/media/CamcorderProfile.html#QUALITY_2160P">QUALITY_<wbr/>2160P</a>],<wbr/> if the profile is
 supported by the device and has
 <a href="https://developer.android.com/reference/android/media/CamcorderProfile.html#videoFrameRate">videoFrameRate</a> <code>x</code>,<wbr/> this list will
-always include (<code>x</code>,<wbr/><code>x</code>).<wbr/></li>
-<li>For preview streaming use case,<wbr/> this list will always include (<code>min</code>,<wbr/> <code>max</code>) where
-<code>min</code> &lt;= 15 and <code>max</code> &gt;= 30.<wbr/></li>
+always include (<code>x</code>,<wbr/><code>x</code>).<wbr/></p>
+</li>
+<li>
+<p>Also,<wbr/> a camera device must either not support any
+<a href="https://developer.android.com/reference/android/media/CamcorderProfile.html">CamcorderProfile</a>,<wbr/>
+or support at least one
+normal <a href="https://developer.android.com/reference/android/media/CamcorderProfile.html">CamcorderProfile</a> that has
+<a href="https://developer.android.com/reference/android/media/CamcorderProfile.html#videoFrameRate">videoFrameRate</a> <code>x</code> &gt;= 24.<wbr/></p>
+</li>
 </ul>
 <p>For devices at the LIMITED level or above:</p>
 <ul>
@@ -15307,7 +15314,7 @@ raw sensor images.<wbr/></p>
 <li>The maximum available resolution for RAW_<wbr/>SENSOR streams
   will match either the value in
   <a href="#static_android.sensor.info.pixelArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pixel<wbr/>Array<wbr/>Size</a> or
-  <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/></li>
+  <a href="#static_android.sensor.info.preCorrectionActiveArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pre<wbr/>Correction<wbr/>Active<wbr/>Array<wbr/>Size</a>.<wbr/></li>
 <li>All DNG-related optional metadata entries are provided
   by the camera device.<wbr/></li>
 </ul></span>
