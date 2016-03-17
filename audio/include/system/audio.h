@@ -198,8 +198,14 @@ typedef enum {
      * and requests a new session ID to be allocated
      * TODO use unique values for AUDIO_SESSION_OUTPUT_MIX and AUDIO_SESSION_ALLOCATE,
      * after all uses have been updated from 0 to the appropriate symbol, and have been tested.
+     * Corresponds to AudioManager.AUDIO_SESSION_ID_GENERATE and AudioSystem.AUDIO_SESSION_ALLOCATE.
      */
     AUDIO_SESSION_ALLOCATE = 0,
+
+    /* For use with AudioRecord::start(), this indicates no trigger session.
+     * It is also used with output tracks and patch tracks, which never have a session.
+     */
+    AUDIO_SESSION_NONE = 0,
 } audio_session_t;
 
 /* a unique ID allocated by AudioFlinger for use as an audio_io_handle_t, audio_session_t,
