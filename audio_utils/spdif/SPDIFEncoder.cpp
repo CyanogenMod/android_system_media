@@ -63,7 +63,7 @@ SPDIFEncoder::SPDIFEncoder(audio_format_t format)
             * SPDIF_ENCODED_CHANNEL_COUNT
             * mFramer->getMaxSampleFramesPerSyncFrame();
 
-    ALOGI("SPDIFEncoder: mBurstBufferSizeBytes = %d, littleEndian = %d",
+    ALOGI("SPDIFEncoder: mBurstBufferSizeBytes = %zu, littleEndian = %d",
             mBurstBufferSizeBytes, isLittleEndian());
     mBurstBuffer = new uint16_t[mBurstBufferSizeBytes >> 1];
     clearBurstBuffer();
@@ -103,7 +103,7 @@ void SPDIFEncoder::writeBurstBufferShorts(const uint16_t *buffer, size_t numShor
     mByteCursor = (mByteCursor + 1) & ~1; // round up to even byte
     size_t bytesToWrite = numShorts * sizeof(uint16_t);
     if ((mByteCursor + bytesToWrite) > mBurstBufferSizeBytes) {
-        ALOGE("SPDIFEncoder: Burst buffer overflow!\n");
+        ALOGE("SPDIFEncoder: Burst buffer overflow!");
         reset();
         return;
     }
@@ -123,7 +123,7 @@ void SPDIFEncoder::writeBurstBufferBytes(const uint8_t *buffer, size_t numBytes)
 {
     size_t bytesToWrite = numBytes;
     if ((mByteCursor + bytesToWrite) > mBurstBufferSizeBytes) {
-        ALOGE("SPDIFEncoder: Burst buffer overflow!\n");
+        ALOGE("SPDIFEncoder: Burst buffer overflow!");
         clearBurstBuffer();
         return;
     }
@@ -224,7 +224,7 @@ ssize_t SPDIFEncoder::write( const void *buffer, size_t numBytes )
 {
     size_t bytesLeft = numBytes;
     const uint8_t *data = (const uint8_t *)buffer;
-    ALOGV("SPDIFEncoder: mScanning = %d, write(buffer[0] = 0x%02X, numBytes = %u)",
+    ALOGV("SPDIFEncoder: mScanning = %d, write(buffer[0] = 0x%02X, numBytes = %zu)",
         mScanning, (uint) *data, numBytes);
     while (bytesLeft > 0) {
         if (mScanning) {
