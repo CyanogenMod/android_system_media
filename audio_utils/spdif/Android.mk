@@ -18,5 +18,4 @@ LOCAL_SHARED_LIBRARIES := \
 	libcutils \
 	liblog
 
-LOCAL_CFLAGS := -Werror -Wall
 include $(BUILD_SHARED_LIBRARY)

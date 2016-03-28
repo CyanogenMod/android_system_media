@@ -27,8 +27,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_EXPORT_C_INCLUDE_DIRS := system/media/alsa_utils/include
 LOCAL_SHARED_LIBRARIES := liblog libcutils libtinyalsa libaudioutils
 LOCAL_MODULE_TAGS := optional
-LOCAL_CFLAGS := -Werror -Wall
-LOCAL_CFLAGS += -Wno-unused-parameter
+LOCAL_CFLAGS := -Wno-unused-parameter
 
 include $(BUILD_SHARED_LIBRARY)
 
