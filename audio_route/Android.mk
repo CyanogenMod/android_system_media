@@ -8,5 +8,4 @@ LOCAL_SRC_FILES:= audio_route.c
 LOCAL_MODULE := libaudioroute
 LOCAL_SHARED_LIBRARIES:= liblog libcutils libutils libexpat libtinyalsa
 LOCAL_MODULE_TAGS := optional
-LOCAL_CFLAGS := -Werror -Wall
 include $(BUILD_SHARED_LIBRARY)
