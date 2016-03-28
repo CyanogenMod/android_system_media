@@ -181,6 +181,10 @@ bool AC3FrameScanner::parseHeader()
         return false;
     }
 
+    // bitstream mode, main, commentary, etc.
+    uint32_t bsmod = mHeaderBuffer[5] & 7;
+    mDataTypeInfo = bsmod; // as per IEC61937-3, table 3.
+
     // The names fscod, frmsiz are from the AC3 spec.
     uint32_t fscod = mHeaderBuffer[4] >> 6;
     if (mDataType == SPDIF_DATA_TYPE_E_AC3) {
