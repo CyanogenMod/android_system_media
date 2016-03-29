@@ -362,8 +362,6 @@ int radio_metadata_get_at_index(const radio_metadata_t *metadata,
                                 void **value,
                                 unsigned int *size)
 {
-    unsigned int index_offset;
-    unsigned int data_offset;
     radio_metadata_entry_t *entry;
     radio_metadata_buffer_t *metadata_buf =
             (radio_metadata_buffer_t *)metadata;
