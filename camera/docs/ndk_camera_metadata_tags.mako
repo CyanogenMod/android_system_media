@@ -97,12 +97,21 @@ typedef enum acamera_metadata_tag {
     % if entry.enum:
 // ${ndk(entry.name) | csym}
 typedef enum acamera_metadata_enum_${csym(ndk(entry.name)).lower()} {
+<%
+      i = 0
+%>\
       % for val in entry.enum.values:
-        % if val.id is None:
-    ${ndk(entry.name) | csym}_${val.name},
-        % else:
-    ${'%s_%s'%(csym(ndk(entry.name)), val.name) | pad(65)} = ${val.id},
+        % if val.id is None and not val.hidden:
+    ${'%s_%s'%(csym(ndk(entry.name)), val.name) | pad(70)} = ${i},
+        % elif not val.hidden:
+    ${'%s_%s'%(csym(ndk(entry.name)), val.name) | pad(70)} = ${val.id},
+<%
+          i = int(val.id, 0)
+%>\
         % endif
+<%
+        i += 1
+%>\
       % endfor
 } acamera_metadata_enum_${csym(entry.name).lower()}_t;
 
