@@ -65,12 +65,12 @@ typedef enum acamera_metadata_tag {
     % for sec in find_all_sections(metadata):
 <%
       entries = remove_synthetic(find_unique_entries(sec))
-      skip_sec = all(e.applied_visibility == "system" for e in entries)
+      skip_sec = all(e.applied_ndk_visible == "false" for e in entries)
       if skip_sec:
         continue
 %>\
       % for idx,entry in enumerate(remove_synthetic(find_unique_entries(sec))):
-        % if entry.applied_visibility != "system":
+        % if entry.applied_ndk_visible == "true":
           % if entry.deprecated:
     ${ndk(entry.name) + " = " | csym,ljust(60)}// Deprecated! DO NOT USE
           % else:
@@ -93,7 +93,7 @@ typedef enum acamera_metadata_tag {
  */
 
 % for sec in find_all_sections(metadata):
-  % for entry in filter_visibility(remove_synthetic(find_unique_entries(sec)), ("public", "hidden")):
+  % for entry in filter_ndk_visible(remove_synthetic(find_unique_entries(sec))):
     % if entry.enum:
 // ${ndk(entry.name) | csym}
 typedef enum acamera_metadata_enum_${csym(ndk(entry.name)).lower()} {

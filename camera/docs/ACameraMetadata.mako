@@ -20,19 +20,21 @@
 % for outer_namespace in metadata.outer_namespaces: ## assumes single 'android' namespace
   % for section in outer_namespace.sections:
     % if section.find_first(lambda x: isinstance(x, metadata_model.Entry) and x.kind == kind_name) and \
-         any_visible(section, kind_name, ('public','hidden') ):
+         any_visible(section, kind_name, ('public','ndk_public') ):
       % for inner_namespace in get_children_by_filtering_kind(section, kind_name, 'namespaces'):
 ## We only support 1 level of inner namespace, i.e. android.a.b and android.a.b.c works, but not android.a.b.c.d
 ## If we need to support more, we should use a recursive function here instead.. but the indentation gets trickier.
-        % for entry in filter_visibility(inner_namespace.merged_entries, ('hidden','public')):
+        % for entry in filter_visibility(inner_namespace.merged_entries, ('public','ndk_public')):
           % if not entry.synthetic:
         case ${ndk(entry.name) | csym}:
+          % else:
+            assert(False),"A synthetic key should not present in NDK!"
           % endif
        % endfor
     % endfor
     % for entry in filter_visibility( \
         get_children_by_filtering_kind(section, kind_name, 'merged_entries'), \
-                                         ('hidden', 'public')):
+                                         ('public','ndk_public')):
       % if not entry.synthetic:
         case ${ndk(entry.name) | csym}:
       % endif

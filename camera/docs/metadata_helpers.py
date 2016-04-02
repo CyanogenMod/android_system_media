@@ -834,7 +834,7 @@ def javadoc(metadata, indent = 4):
     # Convert metadata entry "android.x.y.z" to form
     # "{@link CaptureRequest#X_Y_Z android.x.y.z}"
     def javadoc_crossref_filter(node):
-      if node.applied_visibility == 'public':
+      if node.applied_visibility in ('public', 'java_public'):
         return '{@link %s#%s %s}' % (kind_mapping[node.kind],
                                      jkey_identifier(node.name),
                                      node.name)
@@ -844,7 +844,7 @@ def javadoc(metadata, indent = 4):
     # For each public tag "android.x.y.z" referenced, add a
     # "@see CaptureRequest#X_Y_Z"
     def javadoc_crossref_see_filter(node_set):
-      node_set = (x for x in node_set if x.applied_visibility == 'public')
+      node_set = (x for x in node_set if x.applied_visibility in ('public', 'java_public'))
 
       text = '\n'
       for node in node_set:
@@ -1132,6 +1132,18 @@ def remove_synthetic(entries):
     An iterable of Entry nodes
   """
   return (e for e in entries if not e.synthetic)
+
+def filter_ndk_visible(entries):
+  """
+  Filter the given entries by removing those that are not NDK visible.
+
+  Args:
+    entries: An iterable of Entry nodes
+
+  Yields:
+    An iterable of Entry nodes
+  """
+  return (e for e in entries if e.applied_ndk_visible == 'true')
 
 def wbr(text):
   """

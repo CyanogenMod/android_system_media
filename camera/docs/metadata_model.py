@@ -1031,6 +1031,9 @@ class Entry(Node):
                 public entries are visible in the Android SDK.
     applied_visibility: As visibility, but always valid, defaulting to 'system'
                         if no visibility is given for an entry.
+    applied_ndk_visible: Always valid. Default is 'false'.
+                         Set to 'true' when the visibility implied entry is visible
+                         in NDK.
     synthetic: The C-level visibility of this entry ('false', 'true').
                Synthetic entries will not be generated into the native metadata
                list of entries (in C code). In general a synthetic entry is
@@ -1135,6 +1138,12 @@ class Entry(Node):
   @property
   def applied_visibility(self):
     return self._visibility or 'system'
+
+  @property
+  def applied_ndk_visible(self):
+    if self._visibility in ("public", "ndk_public"):
+      return "true"
+    return "false"
 
   @property
   def synthetic(self):
@@ -1274,6 +1283,7 @@ class Entry(Node):
     self._hwlevel = kwargs.get('hwlevel')
     self._deprecated = kwargs.get('deprecated', False)
     self._optional = kwargs.get('optional')
+    self._ndk_visible = kwargs.get('ndk_visible')
 
     self._property_keys = kwargs
 
@@ -1470,6 +1480,7 @@ class MergedEntry(Entry):
                     'type',
                     'type_notes',
                     'visibility',
+                    'ndk_visible',
                     'synthetic',
                     'hwlevel',
                     'deprecated',
