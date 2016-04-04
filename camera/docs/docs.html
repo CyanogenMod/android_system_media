@@ -3957,11 +3957,20 @@ range capture hardware.<wbr/> In all cases,<wbr/> a single image is
 produced in response to a capture request submitted
 while in HDR mode.<wbr/></p>
 <p>Since substantial post-processing is generally needed to
-produce an HDR image,<wbr/> only YUV and JPEG outputs are
-supported for LIMITED/<wbr/>FULL device HDR captures,<wbr/> and only
-JPEG outputs are supported for LEGACY HDR
-captures.<wbr/> Using a RAW output for HDR capture is not
-supported.<wbr/></p></span>
+produce an HDR image,<wbr/> only YUV,<wbr/> PRIVATE,<wbr/> and JPEG
+outputs are supported for LIMITED/<wbr/>FULL device HDR
+captures,<wbr/> and only JPEG outputs are supported for LEGACY
+HDR captures.<wbr/> Using a RAW output for HDR capture is not
+supported.<wbr/></p>
+<p>Some devices may also support always-on HDR,<wbr/> which
+applies HDR processing at full frame rate.<wbr/>  For these
+devices,<wbr/> intents other than STILL_<wbr/>CAPTURE will also
+produce an HDR output with no frame rate impact compared
+to normal operation,<wbr/> though the quality may be lower
+than for STILL_<wbr/>CAPTURE intents.<wbr/></p>
+<p>If SCENE_<wbr/>MODE_<wbr/>HDR is used with unsupported output types
+or capture intents,<wbr/> the images captured will be as if
+the SCENE_<wbr/>MODE was not enabled at all.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FACE_PRIORITY_LOW_LIGHT</span>
@@ -8594,11 +8603,20 @@ range capture hardware.<wbr/> In all cases,<wbr/> a single image is
 produced in response to a capture request submitted
 while in HDR mode.<wbr/></p>
 <p>Since substantial post-processing is generally needed to
-produce an HDR image,<wbr/> only YUV and JPEG outputs are
-supported for LIMITED/<wbr/>FULL device HDR captures,<wbr/> and only
-JPEG outputs are supported for LEGACY HDR
-captures.<wbr/> Using a RAW output for HDR capture is not
-supported.<wbr/></p></span>
+produce an HDR image,<wbr/> only YUV,<wbr/> PRIVATE,<wbr/> and JPEG
+outputs are supported for LIMITED/<wbr/>FULL device HDR
+captures,<wbr/> and only JPEG outputs are supported for LEGACY
+HDR captures.<wbr/> Using a RAW output for HDR capture is not
+supported.<wbr/></p>
+<p>Some devices may also support always-on HDR,<wbr/> which
+applies HDR processing at full frame rate.<wbr/>  For these
+devices,<wbr/> intents other than STILL_<wbr/>CAPTURE will also
+produce an HDR output with no frame rate impact compared
+to normal operation,<wbr/> though the quality may be lower
+than for STILL_<wbr/>CAPTURE intents.<wbr/></p>
+<p>If SCENE_<wbr/>MODE_<wbr/>HDR is used with unsupported output types
+or capture intents,<wbr/> the images captured will be as if
+the SCENE_<wbr/>MODE was not enabled at all.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FACE_PRIORITY_LOW_LIGHT</span>
@@ -21730,7 +21748,7 @@ corresponding to the element of the CFA in row=0,<wbr/> column=0.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Since the android.<wbr/>sensor.<wbr/>black<wbr/>Level may change for different
+              <p>Since the <a href="#static_android.sensor.blackLevelPattern">android.<wbr/>sensor.<wbr/>black<wbr/>Level<wbr/>Pattern</a> may change for different
 capture settings (e.<wbr/>g.,<wbr/> <a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a>),<wbr/> the white
 level will change accordingly.<wbr/> This key is similar to
 <a href="#static_android.sensor.info.whiteLevel">android.<wbr/>sensor.<wbr/>info.<wbr/>white<wbr/>Level</a>,<wbr/> but specifies the camera device

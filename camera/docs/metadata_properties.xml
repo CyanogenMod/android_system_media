@@ -1704,11 +1704,22 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               while in HDR mode.
 
               Since substantial post-processing is generally needed to
-              produce an HDR image, only YUV and JPEG outputs are
-              supported for LIMITED/FULL device HDR captures, and only
-              JPEG outputs are supported for LEGACY HDR
-              captures. Using a RAW output for HDR capture is not
+              produce an HDR image, only YUV, PRIVATE, and JPEG
+              outputs are supported for LIMITED/FULL device HDR
+              captures, and only JPEG outputs are supported for LEGACY
+              HDR captures. Using a RAW output for HDR capture is not
               supported.
+
+              Some devices may also support always-on HDR, which
+              applies HDR processing at full frame rate.  For these
+              devices, intents other than STILL_CAPTURE will also
+              produce an HDR output with no frame rate impact compared
+              to normal operation, though the quality may be lower
+              than for STILL_CAPTURE intents.
+
+              If SCENE_MODE_HDR is used with unsupported output types
+              or capture intents, the images captured will be as if
+              the SCENE_MODE was not enabled at all.
               </notes>
             </value>
             <value optional="true" hidden="true">FACE_PRIORITY_LOW_LIGHT
@@ -7209,7 +7220,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </description>
           <range> &amp;gt;= 0</range>
           <details>
-          Since the android.sensor.blackLevel may change for different
+          Since the android.sensor.blackLevelPattern may change for different
           capture settings (e.g., android.sensor.sensitivity), the white
           level will change accordingly. This key is similar to
           android.sensor.info.whiteLevel, but specifies the camera device
