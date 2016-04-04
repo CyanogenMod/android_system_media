@@ -101,23 +101,47 @@ typedef enum acamera_metadata_enum_${csym(ndk(entry.name)).lower()} {
       i = 0
 %>\
       % for val in entry.enum.values:
-        % if val.id is None and not val.hidden:
-    ${'%s_%s'%(csym(ndk(entry.name)), val.name) | pad(70)} = ${i},
-        % elif not val.hidden:
+        % if val.hidden:
+          % if val.id:
+<%
+            i = int(val.id, 0) + 1
+            continue
+%>\
+          % else:
+<%
+            i += 1
+            continue
+%>\
+          % endif
+        % endif
+        % if (val.notes or val.deprecated):
+    /*
+          % if val.notes:
+${val.notes | ndkdoc(metadata)}\
+          % endif
+          % if val.deprecated:
+     *
+     * <b>Deprecated</b>: please refer to this API documentation to find the alternatives
+          % endif
+     */
+        % endif
+        % if val.id:
     ${'%s_%s'%(csym(ndk(entry.name)), val.name) | pad(70)} = ${val.id},
 <%
           i = int(val.id, 0)
 %>\
+        % else:
+    ${'%s_%s'%(csym(ndk(entry.name)), val.name) | pad(70)} = ${i},
         % endif
 <%
         i += 1
-%>\
+%>
       % endfor
 } acamera_metadata_enum_${csym(entry.name).lower()}_t;
 
     % endif
   % endfor
 
-%endfor
+% endfor
 
 #endif //_NDK_CAMERA_METADATA_TAGS_H
