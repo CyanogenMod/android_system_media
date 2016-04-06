@@ -34,7 +34,8 @@ static int32_t sEndianDetector = 1;
 #define isLittleEndian()  (*((uint8_t *)&sEndianDetector))
 
 SPDIFEncoder::SPDIFEncoder(audio_format_t format)
-  : mSampleRate(48000)
+  : mFramer(NULL)
+  , mSampleRate(48000)
   , mBurstBuffer(NULL)
   , mBurstBufferSizeBytes(0)
   , mRateMultiplier(1)
@@ -54,10 +55,12 @@ SPDIFEncoder::SPDIFEncoder(audio_format_t format)
             mFramer = new DTSFrameScanner();
             break;
         default:
-            ALOGE("SPDIFEncoder: ERROR invalid audio format = 0x%08X", format);
-            mFramer = NULL;
             break;
     }
+
+    // This a programmer error. Call isFormatSupported() first.
+    LOG_ALWAYS_FATAL_IF((mFramer == NULL),
+        "SPDIFEncoder: invalid audio format = 0x%08X", format);
 
     mBurstBufferSizeBytes = sizeof(uint16_t)
             * SPDIF_ENCODED_CHANNEL_COUNT
@@ -100,6 +103,8 @@ int SPDIFEncoder::getBytesPerOutputFrame()
 
 void SPDIFEncoder::writeBurstBufferShorts(const uint16_t *buffer, size_t numShorts)
 {
+    // avoid static analyser warning
+    LOG_ALWAYS_FATAL_IF((mBurstBuffer == NULL), "mBurstBuffer never allocated");
     mByteCursor = (mByteCursor + 1) & ~1; // round up to even byte
     size_t bytesToWrite = numShorts * sizeof(uint16_t);
     if ((mByteCursor + bytesToWrite) > mBurstBufferSizeBytes) {
