@@ -74,6 +74,26 @@ typedef enum acamera_metadata_tag {
           % if entry.deprecated:
     ${ndk(entry.name) + " = " | csym,ljust(60)}// Deprecated! DO NOT USE
           % else:
+            % if entry.description or entry.details:
+    /**
+${entry.description | ndkdoc(metadata)}\
+     *
+     * <p>This tag may appear in:</p>
+     * <ul>
+              % if metadata.is_entry_this_kind(entry, 'static'):
+     *   <li>ACameraMetadata from ACameraManager_getCameraCharacteristics</li>
+              % endif
+              % if metadata.is_entry_this_kind(entry, 'dynamic'):
+     *   <li>ACameraMetadata from ACameraCaptureSession_captureCallback_result callbacks</li>
+              % endif
+              % if metadata.is_entry_this_kind(entry, 'controls'):
+     *   <li>ACaptureRequest</li>
+              % endif
+     * </ul>
+     *
+${entry.details | ndkdoc(metadata)}\
+     */
+            % endif
     ${ndk(entry.name) + " = " | csym,ljust(60)}// ${annotated_type(entry)}
           % endif
           % if idx == 0:
@@ -122,7 +142,7 @@ typedef enum acamera_metadata_enum_${csym(ndk(entry.name)).lower()} {
           % endif
         % endif
         % if (val.notes or val.deprecated):
-    /*
+    /**
           % if val.notes:
 ${val.notes | ndkdoc(metadata)}\
           % endif

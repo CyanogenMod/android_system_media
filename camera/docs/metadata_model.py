@@ -351,6 +351,21 @@ class Metadata(Node):
       self._entry_map[p.kind].pop(p.name)
       self._entries_ordered.remove(p)
 
+  def is_entry_this_kind(self, entry, kind):
+    """
+    Check if input entry if of input kind
+
+    Args:
+      entry: an Entry object
+      kind: a string. Possible values are "static", "dynamic", "controls"
+
+    Returns:
+      A boolean indicating whether input entry is of input kind.
+    """
+    if kind not in ("static", "dynamic", "controls"):
+      assert(False), "Unknown kind value " + kind
+
+    return entry.name in self._entry_map[kind]
 
   # After all entries/clones are inserted,
   # invoke this to generate the parent/child node graph all these objects
