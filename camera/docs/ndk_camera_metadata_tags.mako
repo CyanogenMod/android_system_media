@@ -101,7 +101,14 @@ typedef enum acamera_metadata_enum_${csym(ndk(entry.name)).lower()} {
       i = 0
 %>\
       % for val in entry.enum.values:
-        % if val.hidden:
+        % if val.ndk_hidden:
+<%
+          print "  WARNING: {}_{} is marked as hidden".format(csym(ndk(entry.name)), val.name) + \
+                " enum in NDK. Please double check this value is properly hidden" +  \
+                " in NDK API implementation"
+%>\
+        % endif
+        % if val.hidden or val.ndk_hidden:
           % if val.id:
 <%
             i = int(val.id, 0) + 1

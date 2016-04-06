@@ -4656,7 +4656,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
                 by the camera device.
               </notes>
             </value>
-            <value optional="true">PRIVATE_REPROCESSING
+            <value optional="true" ndk_hidden="true">PRIVATE_REPROCESSING
               <notes>
               The camera device supports the Zero Shutter Lag reprocessing use case.
 
@@ -4751,7 +4751,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               consistent image output.
               </notes>
             </value>
-            <value optional="true">YUV_REPROCESSING
+            <value optional="true" ndk_hidden="true">YUV_REPROCESSING
               <notes>
               The camera device supports the YUV_420_888 reprocessing use case, similar as
               PRIVATE_REPROCESSING, This capability requires the camera device to support the
@@ -4825,7 +4825,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               rate, including depth stall time.
               </notes>
             </value>
-            <value optional="true">CONSTRAINED_HIGH_SPEED_VIDEO
+            <value optional="true" ndk_hidden="true">CONSTRAINED_HIGH_SPEED_VIDEO
               <notes>
               The device supports constrained high speed video recording (frame rate >=120fps)
               use case. The camera device will support high speed capture session created by
