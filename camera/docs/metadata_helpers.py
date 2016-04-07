@@ -834,7 +834,7 @@ def javadoc(metadata, indent = 4):
     # Convert metadata entry "android.x.y.z" to form
     # "{@link CaptureRequest#X_Y_Z android.x.y.z}"
     def javadoc_crossref_filter(node):
-      if node.applied_visibility == 'public':
+      if node.applied_visibility in ('public', 'java_public'):
         return '{@link %s#%s %s}' % (kind_mapping[node.kind],
                                      jkey_identifier(node.name),
                                      node.name)
@@ -844,7 +844,7 @@ def javadoc(metadata, indent = 4):
     # For each public tag "android.x.y.z" referenced, add a
     # "@see CaptureRequest#X_Y_Z"
     def javadoc_crossref_see_filter(node_set):
-      node_set = (x for x in node_set if x.applied_visibility == 'public')
+      node_set = (x for x in node_set if x.applied_visibility in ('public', 'java_public'))
 
       text = '\n'
       for node in node_set:
@@ -867,6 +867,81 @@ def javadoc(metadata, indent = 4):
     return javatext
 
   return javadoc_formatter
+
+def ndkdoc(metadata, indent = 4):
+  """
+  Returns a function to format a markdown syntax text block as a
+  NDK camera API C/C++ comment section, given a set of metadata
+
+  Args:
+    metadata: A Metadata instance, representing the the top-level root
+      of the metadata for cross-referencing
+    indent: baseline level of indentation for comment block
+  Returns:
+    A function that transforms a String text block as follows:
+    - Indent and * for insertion into a comment block
+    - Trailing whitespace removed
+    - Entire body rendered via markdown
+    - All tag names converted to appropriate NDK tag name for each tag
+
+  Example:
+    "This is a comment for NDK\n" +
+    "     with multiple lines, that should be   \n" +
+    "     formatted better\n" +
+    "\n" +
+    "    That covers multiple lines as well\n"
+    "    And references android.control.mode\n"
+
+    transforms to
+    "    * This is a comment for NDK\n" +
+    "    * with multiple lines, that should be\n" +
+    "    * formatted better\n" +
+    "    * That covers multiple lines as well\n" +
+    "    * and references ACAMERA_CONTROL_MODE\n" +
+    "    *\n" +
+    "    * @see ACAMERA_CONTROL_MODE\n"
+  """
+  def ndkdoc_formatter(text):
+    # render with markdown => HTML
+    ndktext = md(text, JAVADOC_IMAGE_SRC_METADATA)
+
+    # Convert metadata entry "android.x.y.z" to form
+    # NDK tag format of "ACAMERA_X_Y_Z"
+    def ndkdoc_crossref_filter(node):
+      if node.applied_ndk_visible == 'true':
+        return csym(ndk(node.name))
+      else:
+        return node.name
+
+    # For each public tag "android.x.y.z" referenced, add a
+    # "@see ACAMERA_X_Y_Z"
+    def ndkdoc_crossref_see_filter(node_set):
+      node_set = (x for x in node_set if x.applied_ndk_visible == 'true')
+
+      text = '\n'
+      for node in node_set:
+        text = text + '\n@see %s' % (csym(ndk(node.name)))
+
+      return text if text != '\n' else ''
+
+    ndktext = filter_tags(ndktext, metadata, ndkdoc_crossref_filter, ndkdoc_crossref_see_filter)
+
+    ndktext = ndk_replace_tag_wildcards(ndktext, metadata)
+
+    comment_prefix = " " * indent + " * ";
+
+    def line_filter(line):
+      # Indent each line
+      # Add ' * ' to it for stylistic reasons
+      # Strip right side of trailing whitespace
+      return (comment_prefix + line).rstrip()
+
+    # Process each line with above filter
+    ndktext = "\n".join(line_filter(i) for i in ndktext.split("\n")) + "\n"
+
+    return ndktext
+
+  return ndkdoc_formatter
 
 def dedent(text):
   """
@@ -1040,6 +1115,28 @@ def filter_tags(text, metadata, filter_function, summary_function = None):
     else:
       return text
 
+def ndk_replace_tag_wildcards(text, metadata):
+    """
+    Find all references to tags in the form android.xxx.* or android.xxx.yyy.*
+    in the provided text, and replace them by NDK format of "ACAMERA_XXX_*" or
+    "ACAMERA_XXX_YYY_*"
+
+    Args:
+      text: A string representing a block of text destined for output
+      metadata: A Metadata instance, the root of the metadata properties tree
+    """
+    tag_match = r"android\.([a-zA-Z0-9\n]+)\.\*"
+    tag_match_2 = r"android\.([a-zA-Z0-9\n]+)\.([a-zA-Z0-9\n]+)\*"
+
+    def filter_sub(match):
+      return "ACAMERA_" + match.group(1).upper() + "_*"
+    def filter_sub_2(match):
+      return "ACAMERA_" + match.group(1).upper() + match.group(2).upper() + "_*"
+
+    text = re.sub(tag_match, filter_sub, text)
+    text = re.sub(tag_match_2, filter_sub_2, text)
+    return text
+
 def filter_links(text, filter_function, summary_function = None):
     """
     Find all references to tags in the form {@link xxx#yyy [zzz]} in the
@@ -1132,6 +1229,18 @@ def remove_synthetic(entries):
     An iterable of Entry nodes
   """
   return (e for e in entries if not e.synthetic)
+
+def filter_ndk_visible(entries):
+  """
+  Filter the given entries by removing those that are not NDK visible.
+
+  Args:
+    entries: An iterable of Entry nodes
+
+  Yields:
+    An iterable of Entry nodes
+  """
+  return (e for e in entries if e.applied_ndk_visible == 'true')
 
 def wbr(text):
   """

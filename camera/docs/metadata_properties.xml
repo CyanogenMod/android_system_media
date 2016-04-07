@@ -2095,7 +2095,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </details>
           <tag id="BC" />
         </entry>
-        <entry name="maxRegions" type="int32" visibility="hidden"
+        <entry name="maxRegions" type="int32" visibility="ndk_public"
                container="array" hwlevel="legacy">
           <array>
             <size>3</size>
@@ -2113,7 +2113,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           `(AE, AWB, AF)`.</range>
           <tag id="BC" />
         </entry>
-        <entry name="maxRegionsAe" type="int32" visibility="public"
+        <entry name="maxRegionsAe" type="int32" visibility="java_public"
                synthetic="true" hwlevel="legacy">
           <description>
           The maximum number of metering regions that can be used by the auto-exposure (AE)
@@ -2130,7 +2130,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           maxRegions to have this entry be automatically populated.
           </hal_details>
         </entry>
-        <entry name="maxRegionsAwb" type="int32" visibility="public"
+        <entry name="maxRegionsAwb" type="int32" visibility="java_public"
                synthetic="true" hwlevel="legacy">
           <description>
           The maximum number of metering regions that can be used by the auto-white balance (AWB)
@@ -2146,7 +2146,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           maxRegions to have this entry be automatically populated.
           </hal_details>
         </entry>
-        <entry name="maxRegionsAf" type="int32" visibility="public"
+        <entry name="maxRegionsAf" type="int32" visibility="java_public"
                synthetic="true" hwlevel="legacy">
           <description>
           The maximum number of metering regions that can be used by the auto-focus (AF) routine.
@@ -3151,7 +3151,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     </section>
     <section name="jpeg">
       <controls>
-        <entry name="gpsLocation" type="byte" visibility="public" synthetic="true"
+        <entry name="gpsLocation" type="byte" visibility="java_public" synthetic="true"
         typedef="location" hwlevel="legacy">
           <description>
           A location object to use when generating image GPS metadata.
@@ -3162,7 +3162,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           viewed by anyone who receives the JPEG image.
           </details>
         </entry>
-        <entry name="gpsCoordinates" type="double" visibility="hidden"
+        <entry name="gpsCoordinates" type="double" visibility="ndk_public"
         type_notes="latitude, longitude, altitude. First two in degrees, the third in meters"
         container="array" hwlevel="legacy">
           <array>
@@ -3173,14 +3173,14 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <range>(-180 - 180], [-90,90], [-inf, inf]</range>
           <tag id="BC" />
         </entry>
-        <entry name="gpsProcessingMethod" type="byte" visibility="hidden"
+        <entry name="gpsProcessingMethod" type="byte" visibility="ndk_public"
                typedef="string" hwlevel="legacy">
           <description>32 characters describing GPS algorithm to
           include in EXIF.</description>
           <units>UTF-8 null-terminated string</units>
           <tag id="BC" />
         </entry>
-        <entry name="gpsTimestamp" type="int64" visibility="hidden" hwlevel="legacy">
+        <entry name="gpsTimestamp" type="int64" visibility="ndk_public" hwlevel="legacy">
           <description>Time GPS fix was made to include in
           EXIF.</description>
           <units>UTC in seconds since January 1, 1970</units>
@@ -3588,7 +3588,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             the MANUAL_SENSOR capability.</hal_details>
             <tag id="V1" />
           </entry>
-          <entry name="shadingMapSize" type="int32" visibility="hidden"
+          <entry name="shadingMapSize" type="int32" visibility="ndk_public"
                  type_notes="width and height (N, M) of lens shading map provided by the camera device."
                  container="array" typedef="size" hwlevel="full">
             <array>
@@ -4297,8 +4297,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
       </controls>
       <static>
-        <entry name="maxNumOutputStreams" type="int32" visibility="hidden"
-        container="array" hwlevel="legacy">
+        <entry name="maxNumOutputStreams" type="int32" visibility="ndk_public"
+               container="array" hwlevel="legacy">
           <array>
             <size>3</size>
           </array>
@@ -4340,7 +4340,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </details>
           <tag id="BC" />
         </entry>
-        <entry name="maxNumOutputRaw" type="int32" visibility="public" synthetic="true" hwlevel="legacy">
+        <entry name="maxNumOutputRaw" type="int32" visibility="java_public" synthetic="true"
+               hwlevel="legacy">
           <description>The maximum numbers of different types of output streams
           that can be configured and used simultaneously by a camera device
           for any `RAW` formats.
@@ -4367,7 +4368,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           never support raw streams.
           </details>
         </entry>
-        <entry name="maxNumOutputProc" type="int32" visibility="public" synthetic="true" hwlevel="legacy">
+        <entry name="maxNumOutputProc" type="int32" visibility="java_public" synthetic="true"
+               hwlevel="legacy">
           <description>The maximum numbers of different types of output streams
           that can be configured and used simultaneously by a camera device
           for any processed (but not-stalling) formats.
@@ -4402,7 +4404,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           LEGACY devices will support at least 2 processing/non-stalling streams.
           </details>
         </entry>
-        <entry name="maxNumOutputProcStalling" type="int32" visibility="public" synthetic="true" hwlevel="legacy">
+        <entry name="maxNumOutputProcStalling" type="int32" visibility="java_public" synthetic="true"
+               hwlevel="legacy">
           <description>The maximum numbers of different types of output streams
           that can be configured and used simultaneously by a camera device
           for any processed (and stalling) formats.
@@ -4664,7 +4667,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
                 by the camera device.
               </notes>
             </value>
-            <value optional="true">PRIVATE_REPROCESSING
+            <value optional="true" ndk_hidden="true">PRIVATE_REPROCESSING
               <notes>
               The camera device supports the Zero Shutter Lag reprocessing use case.
 
@@ -4759,7 +4762,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               consistent image output.
               </notes>
             </value>
-            <value optional="true">YUV_REPROCESSING
+            <value optional="true" ndk_hidden="true">YUV_REPROCESSING
               <notes>
               The camera device supports the YUV_420_888 reprocessing use case, similar as
               PRIVATE_REPROCESSING, This capability requires the camera device to support the
@@ -4833,7 +4836,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               rate, including depth stall time.
               </notes>
             </value>
-            <value optional="true">CONSTRAINED_HIGH_SPEED_VIDEO
+            <value optional="true" ndk_hidden="true">CONSTRAINED_HIGH_SPEED_VIDEO
               <notes>
               The device supports constrained high speed video recording (frame rate >=120fps)
               use case. The camera device will support high speed capture session created by
@@ -4981,8 +4984,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           DEPTH).
           </hal_details>
         </entry>
-        <entry name="availableRequestKeys" type="int32" visibility="hidden"
-          container="array" hwlevel="legacy">
+        <entry name="availableRequestKeys" type="int32" visibility="ndk_public"
+               container="array" hwlevel="legacy">
           <array>
             <size>n</size>
           </array>
@@ -5013,8 +5016,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           {@link android.hardware.camera2.CameraCharacteristics#getAvailableCaptureRequestKeys}.
           </hal_details>
         </entry>
-        <entry name="availableResultKeys" type="int32" visibility="hidden"
-          container="array" hwlevel="legacy">
+        <entry name="availableResultKeys" type="int32" visibility="ndk_public"
+               container="array" hwlevel="legacy">
           <array>
             <size>n</size>
           </array>
@@ -5056,8 +5059,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           android.hardware.camera2.CameraCharacteristics#getAvailableCaptureResultKeys}.
           </hal_details>
         </entry>
-        <entry name="availableCharacteristicsKeys" type="int32" visibility="hidden"
-          container="array" hwlevel="legacy">
+        <entry name="availableCharacteristicsKeys" type="int32" visibility="ndk_public"
+               container="array" hwlevel="legacy">
           <array>
             <size>n</size>
           </array>
@@ -5518,9 +5521,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </hal_details>
           <tag id="REPROC" />
         </entry>
-        <entry name="availableStreamConfigurations" type="int32" visibility="hidden"
-          enum="true" container="array"
-          typedef="streamConfiguration" hwlevel="legacy">
+        <entry name="availableStreamConfigurations" type="int32" visibility="ndk_public"
+               enum="true" container="array" typedef="streamConfiguration" hwlevel="legacy">
           <array>
             <size>n</size>
             <size>4</size>
@@ -5620,9 +5622,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           * available[Processed,Raw,Jpeg]Sizes
           </hal_details>
         </entry>
-        <entry name="availableMinFrameDurations" type="int64" visibility="hidden"
-               container="array"
-               typedef="streamConfigurationDuration" hwlevel="legacy">
+        <entry name="availableMinFrameDurations" type="int64" visibility="ndk_public"
+               container="array" typedef="streamConfigurationDuration" hwlevel="legacy">
           <array>
             <size>4</size>
             <size>n</size>
@@ -5651,7 +5652,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </details>
           <tag id="V1" />
         </entry>
-        <entry name="availableStallDurations" type="int64" visibility="hidden"
+        <entry name="availableStallDurations" type="int64" visibility="ndk_public"
                container="array" typedef="streamConfigurationDuration" hwlevel="legacy">
           <array>
             <size>4</size>
@@ -5735,7 +5736,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </hal_details>
           <tag id="V1" />
         </entry>
-        <entry name="streamConfigurationMap" type="int32" visibility="public"
+        <entry name="streamConfigurationMap" type="int32" visibility="java_public"
                synthetic="true" typedef="streamConfigurationMap"
                hwlevel="legacy">
           <description>The available stream configurations that this
@@ -7512,8 +7513,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
       <dynamic>
         <clone entry="android.statistics.faceDetectMode"
                kind="controls"></clone>
-        <entry name="faceIds" type="int32" visibility="hidden" container="array"
-               hwlevel="legacy">
+        <entry name="faceIds" type="int32" visibility="ndk_public"
+               container="array" hwlevel="legacy">
           <array>
             <size>n</size>
           </array>
@@ -7526,9 +7527,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           Only available if android.statistics.faceDetectMode == FULL</details>
           <tag id="BC" />
         </entry>
-        <entry name="faceLandmarks" type="int32" visibility="hidden"
-        type_notes="(leftEyeX, leftEyeY, rightEyeX, rightEyeY, mouthX, mouthY)"
-        container="array" hwlevel="legacy">
+        <entry name="faceLandmarks" type="int32" visibility="ndk_public"
+               type_notes="(leftEyeX, leftEyeY, rightEyeX, rightEyeY, mouthX, mouthY)"
+               container="array" hwlevel="legacy">
           <array>
             <size>n</size>
             <size>6</size>
@@ -7542,9 +7543,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             Only available if android.statistics.faceDetectMode == FULL</details>
           <tag id="BC" />
         </entry>
-        <entry name="faceRectangles" type="int32" visibility="hidden"
-        type_notes="(xmin, ymin, xmax, ymax). (0,0) is top-left of active pixel area"
-        container="array" typedef="rectangle" hwlevel="legacy">
+        <entry name="faceRectangles" type="int32" visibility="ndk_public"
+               type_notes="(xmin, ymin, xmax, ymax). (0,0) is top-left of active pixel area"
+               container="array" typedef="rectangle" hwlevel="legacy">
           <array>
             <size>n</size>
             <size>4</size>
@@ -7558,8 +7559,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             Only available if android.statistics.faceDetectMode != OFF</details>
           <tag id="BC" />
         </entry>
-        <entry name="faceScores" type="byte" visibility="hidden" container="array"
-               hwlevel="legacy">
+        <entry name="faceScores" type="byte" visibility="ndk_public"
+               container="array" hwlevel="legacy">
           <array>
             <size>n</size>
           </array>
@@ -7573,7 +7574,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           all times is illegal).</hal_details>
           <tag id="BC" />
         </entry>
-        <entry name="faces" type="int32" visibility="public" synthetic="true"
+        <entry name="faces" type="int32" visibility="java_public" synthetic="true"
                container="array" typedef="face" hwlevel="legacy">
           <array>
             <size>n</size>
@@ -7670,7 +7671,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           ![Image of a uniform white wall (inverse shading map)](android.statistics.lensShadingMap/inv_shading.png)
           </details>
         </entry>
-        <entry name="lensShadingMap" type="float" visibility="hidden"
+        <entry name="lensShadingMap" type="float" visibility="ndk_public"
                type_notes="2D array of float gain factors per channel to correct lens shading"
                container="array" hwlevel="full">
           <array>
@@ -7907,7 +7908,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     </section>
     <section name="tonemap">
       <controls>
-        <entry name="curveBlue" type="float" visibility="hidden"
+        <entry name="curveBlue" type="float" visibility="ndk_public"
         type_notes="1D array of float pairs (P_IN, P_OUT). The maximum number of pairs is specified by android.tonemap.maxCurvePoints."
         container="array" hwlevel="full">
           <array>
@@ -7919,7 +7920,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           CONTRAST_CURVE.</description>
           <details>See android.tonemap.curveRed for more details.</details>
         </entry>
-        <entry name="curveGreen" type="float" visibility="hidden"
+        <entry name="curveGreen" type="float" visibility="ndk_public"
         type_notes="1D array of float pairs (P_IN, P_OUT). The maximum number of pairs is specified by android.tonemap.maxCurvePoints."
         container="array" hwlevel="full">
           <array>
@@ -7931,7 +7932,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           CONTRAST_CURVE.</description>
           <details>See android.tonemap.curveRed for more details.</details>
         </entry>
-        <entry name="curveRed" type="float" visibility="hidden"
+        <entry name="curveRed" type="float" visibility="ndk_public"
         type_notes="1D array of float pairs (P_IN, P_OUT). The maximum number of pairs is specified by android.tonemap.maxCurvePoints."
         container="array" hwlevel="full">
           <array>
@@ -8006,7 +8007,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           control points used as are available.
         </hal_details>
         </entry>
-        <entry name="curve" type="float" visibility="public" synthetic="true"
+        <entry name="curve" type="float" visibility="java_public" synthetic="true"
                typedef="tonemapCurve"
                hwlevel="full">
           <description>Tonemapping / contrast / gamma curve to use when android.tonemap.mode
@@ -8550,8 +8551,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     </section>
     <section name="sync">
       <dynamic>
-        <entry name="frameNumber" type="int64" visibility="hidden" enum="true"
-               hwlevel="legacy">
+        <entry name="frameNumber" type="int64" visibility="ndk_public"
+               enum="true" hwlevel="legacy">
           <enum>
             <value id="-1">CONVERGING
               <notes>
@@ -8742,7 +8743,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     </section>
     <section name="reprocess">
       <controls>
-        <entry name="effectiveExposureFactor" type="float" visibility="public" hwlevel="limited">
+        <entry name="effectiveExposureFactor" type="float" visibility="java_public" hwlevel="limited">
             <description>
             The amount of exposure time increase factor applied to the original output
             frame by the application processing before sending for reprocessing.
@@ -8793,7 +8794,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
       </clone>
       </dynamic>
       <static>
-        <entry name="maxCaptureStall" type="int32" visibility="public" hwlevel="limited">
+        <entry name="maxCaptureStall" type="int32" visibility="java_public" hwlevel="limited">
           <description>
           The maximal camera capture pipeline stall (in unit of frame count) introduced by a
           reprocess capture request.
@@ -8842,9 +8843,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </details>
           <tag id="DEPTH" />
         </entry>
-        <entry name="availableDepthStreamConfigurations" type="int32" visibility="hidden"
-          enum="true" container="array"
-          typedef="streamConfiguration" hwlevel="limited">
+        <entry name="availableDepthStreamConfigurations" type="int32" visibility="ndk_public"
+               enum="true" container="array" typedef="streamConfiguration" hwlevel="limited">
           <array>
             <size>n</size>
             <size>4</size>
@@ -8874,9 +8874,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </details>
           <tag id="DEPTH" />
         </entry>
-        <entry name="availableDepthMinFrameDurations" type="int64" visibility="hidden"
-               container="array"
-               typedef="streamConfigurationDuration" hwlevel="limited">
+        <entry name="availableDepthMinFrameDurations" type="int64" visibility="ndk_public"
+               container="array" typedef="streamConfigurationDuration" hwlevel="limited">
           <array>
             <size>4</size>
             <size>n</size>
@@ -8905,7 +8904,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </details>
           <tag id="DEPTH" />
         </entry>
-        <entry name="availableDepthStallDurations" type="int64" visibility="hidden"
+        <entry name="availableDepthStallDurations" type="int64" visibility="ndk_public"
                container="array" typedef="streamConfigurationDuration" hwlevel="limited">
           <array>
             <size>4</size>

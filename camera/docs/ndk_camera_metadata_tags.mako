@@ -65,12 +65,12 @@ typedef enum acamera_metadata_tag {
     % for sec in find_all_sections(metadata):
 <%
       entries = remove_synthetic(find_unique_entries(sec))
-      skip_sec = all(e.applied_visibility == "system" for e in entries)
+      skip_sec = all(e.applied_ndk_visible == "false" for e in entries)
       if skip_sec:
         continue
 %>\
       % for idx,entry in enumerate(remove_synthetic(find_unique_entries(sec))):
-        % if entry.applied_visibility != "system":
+        % if entry.applied_ndk_visible == "true":
           % if entry.deprecated:
     ${ndk(entry.name) + " = " | csym,ljust(60)}// Deprecated! DO NOT USE
           % else:
@@ -93,7 +93,7 @@ typedef enum acamera_metadata_tag {
  */
 
 % for sec in find_all_sections(metadata):
-  % for entry in filter_visibility(remove_synthetic(find_unique_entries(sec)), ("public", "hidden")):
+  % for entry in filter_ndk_visible(remove_synthetic(find_unique_entries(sec))):
     % if entry.enum:
 // ${ndk(entry.name) | csym}
 typedef enum acamera_metadata_enum_${csym(ndk(entry.name)).lower()} {
@@ -101,23 +101,54 @@ typedef enum acamera_metadata_enum_${csym(ndk(entry.name)).lower()} {
       i = 0
 %>\
       % for val in entry.enum.values:
-        % if val.id is None and not val.hidden:
-    ${'%s_%s'%(csym(ndk(entry.name)), val.name) | pad(70)} = ${i},
-        % elif not val.hidden:
+        % if val.ndk_hidden:
+<%
+          print "  WARNING: {}_{} is marked as hidden".format(csym(ndk(entry.name)), val.name) + \
+                " enum in NDK. Please double check this value is properly hidden" +  \
+                " in NDK API implementation"
+%>\
+        % endif
+        % if val.hidden or val.ndk_hidden:
+          % if val.id:
+<%
+            i = int(val.id, 0) + 1
+            continue
+%>\
+          % else:
+<%
+            i += 1
+            continue
+%>\
+          % endif
+        % endif
+        % if (val.notes or val.deprecated):
+    /*
+          % if val.notes:
+${val.notes | ndkdoc(metadata)}\
+          % endif
+          % if val.deprecated:
+     *
+     * <b>Deprecated</b>: please refer to this API documentation to find the alternatives
+          % endif
+     */
+        % endif
+        % if val.id:
     ${'%s_%s'%(csym(ndk(entry.name)), val.name) | pad(70)} = ${val.id},
 <%
           i = int(val.id, 0)
 %>\
+        % else:
+    ${'%s_%s'%(csym(ndk(entry.name)), val.name) | pad(70)} = ${i},
         % endif
 <%
         i += 1
-%>\
+%>
       % endfor
 } acamera_metadata_enum_${csym(entry.name).lower()}_t;
 
     % endif
   % endfor
 
-%endfor
+% endfor
 
 #endif //_NDK_CAMERA_METADATA_TAGS_H
