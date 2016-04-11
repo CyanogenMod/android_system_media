@@ -24,7 +24,7 @@
         HashSet<String> charsKeyNames = new HashSet<String>();
 % for sec in find_all_sections(metadata):
   % for entry in find_unique_entries(sec):
-    % if entry.kind == 'static' and entry.visibility == "public":
+    % if entry.kind == 'static' and entry.visibility in ("public", "java_public"):
         charsKeyNames.add(CameraCharacteristics.${jkey_identifier(entry.name)}.getName());
     % endif
   % endfor

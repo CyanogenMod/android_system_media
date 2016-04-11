@@ -2758,7 +2758,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
       </static>
       <controls>
         <entry name="postRawSensitivityBoost" type="int32" visibility="public">
-          <description>The amount of additional sesnsitivity boost applied to output images
+          <description>The amount of additional sensitivity boost applied to output images
              after RAW sensor data is captured.
           </description>
           <units>ISO arithmetic units, the same as android.sensor.sensitivity</units>
@@ -2769,10 +2769,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           Such a boost will be applied to YUV/JPEG format output images but will not
           have effect on RAW output formats like RAW_SENSOR, RAW10, RAW12 or RAW_OPAQUE.
 
-          This key is optional. Applications can assume there is no boost applied
-          after RAW is captured if this key is not available.
-          When this key is available, the sensitivity boost value must be within
-          android.control.postRawSensitivityBoostRange.
+          This key will be `null` for devices that do not support any RAW format
+          outputs. For devices that do support RAW format outputs, this key will always
+          present, and if a device does not support post RAW sensitivity boost, it will
+          list `100` in this key.
 
           If the camera device cannot apply the exact boost requested, it will reduce the
           boost to the nearest supported value.
