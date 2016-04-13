@@ -7680,11 +7680,24 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <size>m</size>
           </array>
           <description>The shading map is a low-resolution floating-point map
-          that lists the coefficients used to correct for vignetting, for each
-          Bayer color channel of RAW image data.</description>
+          that lists the coefficients used to correct for vignetting and color shading,
+          for each Bayer color channel of RAW image data.</description>
           <range>Each gain factor is &amp;gt;= 1</range>
-          <details>The least shaded section of the image should have a gain factor
-          of 1; all other sections should have gains above 1.
+          <details>
+          The lens shading correction is defined as a full shading correction that
+          corrects both color shading for the output non-RAW images. After the
+          shading map is applied, the output non-RAW images will be flat-field images
+          for flat scenes under uniform illumination.
+
+          When there is no lens shading correction applied to RAW output images
+          (android.sensor.info.lensShadingApplied `==` false), this map is a full lens
+          shading correction map; when there is some lens shading correction applied
+          to the RAW output image (android.sensor.info.lensShadingApplied `==` true),
+          this map reports the remaining lens shading correction map that needs to be
+          applied to get fully shading corrected images.
+
+          For a full shading correction map, the least shaded section of the image
+          should have a gain factor of 1; all other sections should have gains above 1.
 
           When android.colorCorrection.mode = TRANSFORM_MATRIX, the map
           must take into account the colorCorrection settings.

@@ -23608,8 +23608,8 @@ image of a gray wall (using bicubic interpolation for visual quality) as capture
 
             <td class="entry_description">
               <p>The shading map is a low-resolution floating-point map
-that lists the coefficients used to correct for vignetting,<wbr/> for each
-Bayer color channel of RAW image data.<wbr/></p>
+that lists the coefficients used to correct for vignetting and color shading,<wbr/>
+for each Bayer color channel of RAW image data.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -23628,8 +23628,18 @@ Bayer color channel of RAW image data.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>The least shaded section of the image should have a gain factor
-of 1; all other sections should have gains above 1.<wbr/></p>
+              <p>The lens shading correction is defined as a full shading correction that
+corrects both color shading for the output non-RAW images.<wbr/> After the
+shading map is applied,<wbr/> the output non-RAW images will be flat-field images
+for flat scenes under uniform illumination.<wbr/></p>
+<p>When there is no lens shading correction applied to RAW output images
+(<a href="#static_android.sensor.info.lensShadingApplied">android.<wbr/>sensor.<wbr/>info.<wbr/>lens<wbr/>Shading<wbr/>Applied</a> <code>==</code> false),<wbr/> this map is a full lens
+shading correction map; when there is some lens shading correction applied
+to the RAW output image (<a href="#static_android.sensor.info.lensShadingApplied">android.<wbr/>sensor.<wbr/>info.<wbr/>lens<wbr/>Shading<wbr/>Applied</a> <code>==</code> true),<wbr/>
+this map reports the remaining lens shading correction map that needs to be
+applied to get fully shading corrected images.<wbr/></p>
+<p>For a full shading correction map,<wbr/> the least shaded section of the image
+should have a gain factor of 1; all other sections should have gains above 1.<wbr/></p>
 <p>When <a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> = TRANSFORM_<wbr/>MATRIX,<wbr/> the map
 must take into account the colorCorrection settings.<wbr/></p>
 <p>The shading map is for the entire active pixel array,<wbr/> and is not
