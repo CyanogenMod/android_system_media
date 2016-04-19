@@ -180,6 +180,7 @@ typedef struct {
 } audio_attributes_t;
 
 /* special audio session values
+ * do not need to have audio_unique_id_get_use(session) == AUDIO_UNIQUE_ID_USE_SESSION
  * (XXX: should this be living in the audio effects land?)
  */
 typedef enum {
@@ -218,7 +219,7 @@ typedef int audio_unique_id_t;
 /* Possible uses for an audio_unique_id_t */
 typedef enum {
     AUDIO_UNIQUE_ID_USE_UNSPECIFIED = 0,
-    AUDIO_UNIQUE_ID_USE_SESSION = 1,
+    AUDIO_UNIQUE_ID_USE_SESSION = 1,    // for allocated sessions, not special AUDIO_SESSION_*
     AUDIO_UNIQUE_ID_USE_MODULE = 2,
     AUDIO_UNIQUE_ID_USE_EFFECT = 3,
     AUDIO_UNIQUE_ID_USE_PATCH = 4,
