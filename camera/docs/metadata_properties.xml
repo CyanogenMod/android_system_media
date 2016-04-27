@@ -7206,7 +7206,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           This key will be available if android.sensor.opticalBlackRegions is
           available or the camera device advertises this key via
-          {@link android.hardware.camera2.CameraCharacteristics#getAvailableCaptureRequestKeys}.
+          {@link android.hardware.camera2.CameraCharacteristics#getAvailableCaptureResultKeys}.
           </details>
           <hal_details>
           The values are given in row-column scan order, with the first value
