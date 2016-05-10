@@ -15,6 +15,15 @@
  * limitations under the License.
  */
 
+/**
+ * @addtogroup Camera
+ * @{
+ */
+
+/**
+ * @file NdkCameraMetadataTags.h
+ */
+
 /*
  * This file defines an NDK API.
  * Do not remove methods.
@@ -172,3 +181,5 @@ ${val.notes | ndkdoc(metadata)}\
 % endfor
 
 #endif //_NDK_CAMERA_METADATA_TAGS_H
+
+/** @} */
