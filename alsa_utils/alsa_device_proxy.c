@@ -15,7 +15,7 @@
  */
 
 #define LOG_TAG "alsa_device_proxy"
-/*#define LOG_NDEBUG 0*/
+#define LOG_NDEBUG 0
 /*#define LOG_PCM_PARAMS 0*/
 
 #include <log/log.h>
@@ -43,7 +43,10 @@ void proxy_prepare(alsa_device_proxy * proxy, alsa_device_profile* profile,
                    struct pcm_config * config)
 {
     ALOGV("proxy_prepare(c:%d, d:%d)", profile->card, profile->device);
-
+    if (profile->card < 0 || profile->device < 0) {
+        ALOGV("INVALID PROXY!");
+        return;
+    }
     proxy->profile = profile;
 
 #ifdef LOG_PCM_PARAMS
@@ -217,4 +220,33 @@ int proxy_write(alsa_device_proxy * proxy, const void *data, unsigned int count)
 int proxy_read(const alsa_device_proxy * proxy, void *data, unsigned int count)
 {
     return pcm_read(proxy->pcm, data, count);
+}
+
+/*
+ * Debugging
+ */
+void proxy_log(alsa_device_proxy * proxy, const char* tag) {
+    ALOGI("proxy_dump() - %s", tag);
+
+    // struct pcm_config alsa_config;
+    ALOGI("  channels:%d", proxy->alsa_config.channels);
+    ALOGI("  rate:%d", proxy->alsa_config.rate);
+    ALOGI("  period_size:%d", proxy->alsa_config.period_size);
+    ALOGI("  period_count:%d", proxy->alsa_config.period_count);
+    ALOGI("  format:%d", proxy->alsa_config.format);
+
+    // struct pcm * pcm;
+
+}
+
+void proxy_dump(const alsa_device_proxy* proxy, int fd)
+{
+    char msg[128];
+
+    write(fd, msg, sprintf(msg, "  proxy: %p\n", proxy));
+    write(fd, msg, sprintf(msg, "  channels: %d\n", proxy->alsa_config.channels));
+    write(fd, msg, sprintf(msg, "  rate: %d\n", proxy->alsa_config.rate));
+    write(fd, msg, sprintf(msg, "  period_size: %d\n", proxy->alsa_config.period_size));
+    write(fd, msg, sprintf(msg, "  period_count: %d\n", proxy->alsa_config.period_count));
+    write(fd, msg, sprintf(msg, "  format: %d\n", proxy->alsa_config.format));
 }
