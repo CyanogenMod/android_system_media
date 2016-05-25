@@ -34,6 +34,7 @@ IMAGE_SRC_METADATA="images/camera2/metadata/"
 
 # Prepend this path to each <img src="foo"> in javadocs
 JAVADOC_IMAGE_SRC_METADATA="../../../../" + IMAGE_SRC_METADATA
+NDKDOC_IMAGE_SRC_METADATA="../" + IMAGE_SRC_METADATA
 
 _context_buf = None
 
@@ -903,7 +904,7 @@ def ndkdoc(metadata, indent = 4):
   """
   def ndkdoc_formatter(text):
     # render with markdown => HTML
-    ndktext = md(text, JAVADOC_IMAGE_SRC_METADATA)
+    ndktext = md(text, NDKDOC_IMAGE_SRC_METADATA, False)
 
     # Convert metadata entry "android.x.y.z" to form
     # NDK tag format of "ACAMERA_X_Y_Z"
@@ -968,7 +969,7 @@ def dedent(text):
 
   return text
 
-def md(text, img_src_prefix=""):
+def md(text, img_src_prefix="", table_ext=True):
     """
     Run text through markdown to produce HTML.
 
@@ -1012,7 +1013,7 @@ def md(text, img_src_prefix=""):
     text = dedent(text)
 
     # full list of extensions at http://pythonhosted.org/Markdown/extensions/
-    md_extensions = ['tables'] # make <table> with ASCII |_| tables
+    md_extensions = ['tables'] if table_ext else []# make <table> with ASCII |_| tables
     # render with markdown
     text = markdown.markdown(text, md_extensions)
 

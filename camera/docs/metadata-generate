@@ -61,8 +61,14 @@ function gen_file_abs() {
     local in="$1"
     local out="$2"
     local intermediates="$3"
+    local ndk="$4"
+    local spec_file=$thisdir/metadata_properties.xml
 
-    python $thisdir/metadata_parser_xml.py $thisdir/metadata_properties.xml $in $out
+    if [[ "$ndk" == "yes" ]]; then
+      spec_file=$thisdir/ndk_metadata_properties.xml
+    fi
+
+    python $thisdir/metadata_parser_xml.py $spec_file $in $out
 
     local succ=$?
 
@@ -197,7 +203,7 @@ gen_file camera_metadata_tag_info.mako ../src/camera_metadata_tag_info.c || exit
 gen_file camera_metadata_tags.mako ../include/system/camera_metadata_tags.h || exit 1
 
 #Generate NDK header
-gen_file_abs ndk_camera_metadata_tags.mako "$ndk_header_dir/NdkCameraMetadataTags.h" || exit 1
+gen_file_abs ndk_camera_metadata_tags.mako "$ndk_header_dir/NdkCameraMetadataTags.h" yes yes || exit 1
 
 # Generate Java API definitions
 mkdir -p "${outdir}"
