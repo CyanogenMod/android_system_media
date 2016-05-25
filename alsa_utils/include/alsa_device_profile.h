@@ -87,4 +87,7 @@ bool profile_is_channel_count_valid(alsa_device_profile* profile, unsigned count
 unsigned profile_calc_min_period_size(alsa_device_profile* profile, unsigned sample_rate);
 unsigned int profile_get_period_size(alsa_device_profile* profile, unsigned sample_rate);
 
+/* Debugging */
+void profile_dump(const alsa_device_profile* profile, int fd);
+
 #endif /* ANDROID_SYSTEM_MEDIA_ALSA_UTILS_ALSA_DEVICE_PROFILE_H */

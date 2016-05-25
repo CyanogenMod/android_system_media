@@ -218,3 +218,17 @@ int proxy_read(const alsa_device_proxy * proxy, void *data, unsigned int count)
 {
     return pcm_read(proxy->pcm, data, count);
 }
+
+/*
+ * Debugging
+ */
+void proxy_dump(const alsa_device_proxy* proxy, int fd)
+{
+    if (proxy != NULL) {
+        dprintf(fd, "  channels: %d\n", proxy->alsa_config.channels);
+        dprintf(fd, "  rate: %d\n", proxy->alsa_config.rate);
+        dprintf(fd, "  period_size: %d\n", proxy->alsa_config.period_size);
+        dprintf(fd, "  period_count: %d\n", proxy->alsa_config.period_count);
+        dprintf(fd, "  format: %d\n", proxy->alsa_config.format);
+    }
+}
