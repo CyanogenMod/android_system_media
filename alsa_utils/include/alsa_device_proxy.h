@@ -52,9 +52,4 @@ void proxy_close(alsa_device_proxy * proxy);
 int proxy_write(alsa_device_proxy * proxy, const void *data, unsigned int count);
 int proxy_read(const alsa_device_proxy * proxy, void *data, unsigned int count);
 
-/* Debugging */
-void proxy_log(alsa_device_proxy * proxy, const char* tag);
-
-void proxy_dump(const alsa_device_proxy * proxy, int fd);
-
 #endif /* ANDROID_SYSTEM_MEDIA_ALSA_UTILS_ALSA_DEVICE_PROXY_H */
