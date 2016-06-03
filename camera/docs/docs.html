@@ -23507,7 +23507,7 @@ generation</p>
             <td class="entry_type">
                 <span class="entry_type_name">byte</span>
 
-              <span class="entry_type_visibility"> [public as lensShadingMap]</span>
+              <span class="entry_type_visibility"> [java_public as lensShadingMap]</span>
 
 
               <span class="entry_type_hwlevel">[full] </span>
@@ -23539,10 +23539,21 @@ Bayer color channel.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>The least shaded section of the image should have a gain factor
-of 1; all other sections should have gains above 1.<wbr/></p>
+              <p>The map provided here is the same map that is used by the camera device to
+correct both color shading and vignetting for output non-RAW images.<wbr/></p>
+<p>When there is no lens shading correction applied to RAW
+output images (<a href="#static_android.sensor.info.lensShadingApplied">android.<wbr/>sensor.<wbr/>info.<wbr/>lens<wbr/>Shading<wbr/>Applied</a> <code>==</code>
+false),<wbr/> this map is the complete lens shading correction
+map; when there is some lens shading correction applied to
+the RAW output image (<a href="#static_android.sensor.info.lensShadingApplied">android.<wbr/>sensor.<wbr/>info.<wbr/>lens<wbr/>Shading<wbr/>Applied</a><code>==</code> true),<wbr/> this map reports the remaining lens shading
+correction map that needs to be applied to get shading
+corrected images that match the camera device's output for
+non-RAW formats.<wbr/></p>
+<p>For a complete shading correction map,<wbr/> the least shaded
+section of the image will have a gain factor of 1; all
+other sections will have gains above 1.<wbr/></p>
 <p>When <a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> = TRANSFORM_<wbr/>MATRIX,<wbr/> the map
-must take into account the colorCorrection settings.<wbr/></p>
+will take into account the colorCorrection settings.<wbr/></p>
 <p>The shading map is for the entire active pixel array,<wbr/> and is not
 affected by the crop region specified in the request.<wbr/> Each shading map
 entry is the value of the shading compensation map over a specific
@@ -23554,8 +23565,8 @@ The map is assumed to be bilinearly interpolated between the sample points.<wbr/
 <p>The channel order is [R,<wbr/> Geven,<wbr/> Godd,<wbr/> B],<wbr/> where Geven is the green
 channel for the even rows of a Bayer pattern,<wbr/> and Godd is the odd rows.<wbr/>
 The shading map is stored in a fully interleaved format.<wbr/></p>
-<p>The shading map should have on the order of 30-40 rows and columns,<wbr/>
-and must be smaller than 64x64.<wbr/></p>
+<p>The shading map will generally have on the order of 30-40 rows and columns,<wbr/>
+and will be smaller than 64x64.<wbr/></p>
 <p>As an example,<wbr/> given a very small map defined as:</p>
 <pre><code>width,<wbr/>height = [ 4,<wbr/> 3 ]
 values =
@@ -23628,20 +23639,21 @@ for each Bayer color channel of RAW image data.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>The lens shading correction is defined as a full shading correction that
-corrects both color shading for the output non-RAW images.<wbr/> After the
-shading map is applied,<wbr/> the output non-RAW images will be flat-field images
-for flat scenes under uniform illumination.<wbr/></p>
-<p>When there is no lens shading correction applied to RAW output images
-(<a href="#static_android.sensor.info.lensShadingApplied">android.<wbr/>sensor.<wbr/>info.<wbr/>lens<wbr/>Shading<wbr/>Applied</a> <code>==</code> false),<wbr/> this map is a full lens
-shading correction map; when there is some lens shading correction applied
-to the RAW output image (<a href="#static_android.sensor.info.lensShadingApplied">android.<wbr/>sensor.<wbr/>info.<wbr/>lens<wbr/>Shading<wbr/>Applied</a> <code>==</code> true),<wbr/>
-this map reports the remaining lens shading correction map that needs to be
-applied to get fully shading corrected images.<wbr/></p>
-<p>For a full shading correction map,<wbr/> the least shaded section of the image
-should have a gain factor of 1; all other sections should have gains above 1.<wbr/></p>
+              <p>The map provided here is the same map that is used by the camera device to
+correct both color shading and vignetting for output non-RAW images.<wbr/></p>
+<p>When there is no lens shading correction applied to RAW
+output images (<a href="#static_android.sensor.info.lensShadingApplied">android.<wbr/>sensor.<wbr/>info.<wbr/>lens<wbr/>Shading<wbr/>Applied</a> <code>==</code>
+false),<wbr/> this map is the complete lens shading correction
+map; when there is some lens shading correction applied to
+the RAW output image (<a href="#static_android.sensor.info.lensShadingApplied">android.<wbr/>sensor.<wbr/>info.<wbr/>lens<wbr/>Shading<wbr/>Applied</a><code>==</code> true),<wbr/> this map reports the remaining lens shading
+correction map that needs to be applied to get shading
+corrected images that match the camera device's output for
+non-RAW formats.<wbr/></p>
+<p>For a complete shading correction map,<wbr/> the least shaded
+section of the image will have a gain factor of 1; all
+other sections will have gains above 1.<wbr/></p>
 <p>When <a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> = TRANSFORM_<wbr/>MATRIX,<wbr/> the map
-must take into account the colorCorrection settings.<wbr/></p>
+will take into account the colorCorrection settings.<wbr/></p>
 <p>The shading map is for the entire active pixel array,<wbr/> and is not
 affected by the crop region specified in the request.<wbr/> Each shading map
 entry is the value of the shading compensation map over a specific
@@ -23654,8 +23666,8 @@ The map is assumed to be bilinearly interpolated between the sample points.<wbr/
 channel for the even rows of a Bayer pattern,<wbr/> and Godd is the odd rows.<wbr/>
 The shading map is stored in a fully interleaved format,<wbr/> and its size
 is provided in the camera static metadata by <a href="#static_android.lens.info.shadingMapSize">android.<wbr/>lens.<wbr/>info.<wbr/>shading<wbr/>Map<wbr/>Size</a>.<wbr/></p>
-<p>The shading map should have on the order of 30-40 rows and columns,<wbr/>
-and must be smaller than 64x64.<wbr/></p>
+<p>The shading map will generally have on the order of 30-40 rows and columns,<wbr/>
+and will be smaller than 64x64.<wbr/></p>
 <p>As an example,<wbr/> given a very small map defined as:</p>
 <pre><code><a href="#static_android.lens.info.shadingMapSize">android.<wbr/>lens.<wbr/>info.<wbr/>shading<wbr/>Map<wbr/>Size</a> = [ 4,<wbr/> 3 ]
 <a href="#dynamic_android.statistics.lensShadingMap">android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map</a> =

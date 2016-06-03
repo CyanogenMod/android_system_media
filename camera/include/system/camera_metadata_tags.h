@@ -347,7 +347,7 @@ typedef enum camera_metadata_tag {
     ANDROID_STATISTICS_FACE_SCORES,                   // byte[]       | ndk_public
     ANDROID_STATISTICS_HISTOGRAM,                     // int32[]      | system
     ANDROID_STATISTICS_SHARPNESS_MAP,                 // int32[]      | system
-    ANDROID_STATISTICS_LENS_SHADING_CORRECTION_MAP,   // byte         | public
+    ANDROID_STATISTICS_LENS_SHADING_CORRECTION_MAP,   // byte         | java_public
     ANDROID_STATISTICS_LENS_SHADING_MAP,              // float[]      | ndk_public
     ANDROID_STATISTICS_PREDICTED_COLOR_GAINS,         // float[]      | hidden
     ANDROID_STATISTICS_PREDICTED_COLOR_TRANSFORM,     // rational[]   | hidden
