@@ -19219,7 +19219,7 @@ than maximum raw value supported,<wbr/> i.<wbr/>e.<wbr/> 2^(sensor bits per pixe
                 
           <tr class="entry" id="static_android.sensor.info.timestampSource">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>sensor.<wbr/>info.<wbr/>timestamp<wbr/>Source
             </td>
             <td class="entry_type">
@@ -19281,6 +19281,21 @@ can be compared against other system time sources/<wbr/>timestamps.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>For camera devices implement UNKNOWN,<wbr/> the camera framework expects that the timestamp
+source to be SYSTEM_<wbr/>TIME_<wbr/>MONOTONIC.<wbr/> For camera devices implement REALTIME,<wbr/> the camera
+framework expects that the timestamp source to be SYSTEM_<wbr/>TIME_<wbr/>BOOTTIME.<wbr/> See
+system/<wbr/>core/<wbr/>include/<wbr/>utils/<wbr/>Timers.<wbr/>h for the definition of SYSTEM_<wbr/>TIME_<wbr/>MONOTONIC and
+SYSTEM_<wbr/>TIME_<wbr/>BOOTTIME.<wbr/> Note that HAL must follow above expectation; otherwise video
+recording might suffer unexpected behavior.<wbr/></p>
+<p>Also,<wbr/> camera devices implements REALTIME must pass the ITS sensor fusion test which
+tests the alignment between camera timestamps and gyro sensor timestamps.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
