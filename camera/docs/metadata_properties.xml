@@ -6229,6 +6229,17 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             This characteristic defines the source for the timestamps, and therefore whether they
             can be compared against other system time sources/timestamps.
             </details>
+            <hal_details>
+            For camera devices implement UNKNOWN, the camera framework expects that the timestamp
+            source to be SYSTEM_TIME_MONOTONIC. For camera devices implement REALTIME, the camera
+            framework expects that the timestamp source to be SYSTEM_TIME_BOOTTIME. See
+            system/core/include/utils/Timers.h for the definition of SYSTEM_TIME_MONOTONIC and
+            SYSTEM_TIME_BOOTTIME. Note that HAL must follow above expectation; otherwise video
+            recording might suffer unexpected behavior.
+
+            Also, camera devices implements REALTIME must pass the ITS sensor fusion test which
+            tests the alignment between camera timestamps and gyro sensor timestamps.
+            </hal_details>
           <tag id="V1" />
         </entry>
         <entry name="lensShadingApplied" type="byte" visibility="public" enum="true"
