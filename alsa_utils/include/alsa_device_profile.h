@@ -81,6 +81,7 @@ bool profile_is_format_valid(alsa_device_profile* profile, enum pcm_format fmt);
 
 /* Channel Methods */
 unsigned profile_get_default_channel_count(alsa_device_profile* profile);
+unsigned profile_get_closest_channel_count(alsa_device_profile* profile, unsigned count);
 bool profile_is_channel_count_valid(alsa_device_profile* profile, unsigned count);
 
 /* Utility */

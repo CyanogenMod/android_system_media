@@ -192,6 +192,21 @@ unsigned profile_get_default_channel_count(alsa_device_profile* profile)
     return profile_is_valid(profile) ? profile->channel_counts[0] : DEFAULT_CHANNEL_COUNT;
 }
 
+unsigned profile_get_closest_channel_count(alsa_device_profile* profile, unsigned count)
+{
+    if (profile_is_valid(profile)) {
+        if (count < profile->min_channel_count) {
+            return profile->min_channel_count;
+        } else if (count > profile->max_channel_count) {
+            return profile->max_channel_count;
+        } else {
+            return count;
+        }
+    } else {
+        return 0;
+    }
+}
+
 bool profile_is_channel_count_valid(alsa_device_profile* profile, unsigned count)
 {
     if (profile_is_initialized(profile)) {
