@@ -41,6 +41,7 @@ const effect_uuid_t * const SL_IID_VISUALIZATION = &SL_IID_VISUALIZATION_;
 
 #define MEASUREMENT_IDX_PEAK 0
 #define MEASUREMENT_IDX_RMS  1
+#define MEASUREMENT_COUNT 2
 
 /* enumerated parameters for Visualizer effect */
 typedef enum
