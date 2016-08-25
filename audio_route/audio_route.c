@@ -578,12 +578,8 @@ static int alloc_mixer_state(struct audio_route *ar)
         /* Skip unsupported types that are not supported yet in XML */
         type = mixer_ctl_get_type(ctl);
 
-        if (!is_supported_ctl_type(type)) {
-            ar->mixer_state[i].old_value = NULL;
-            ar->mixer_state[i].new_value = NULL;
-            ar->mixer_state[i].reset_value = NULL;
+        if (!is_supported_ctl_type(type))
             continue;
-        }
 
         size_t value_sz = sizeof_ctl_type(type);
         ar->mixer_state[i].old_value.ptr = calloc(num_values, value_sz);
