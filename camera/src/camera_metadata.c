@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#define _GNU_SOURCE // for fdprintf
 #include <inttypes.h>
 #include <system/camera_metadata.h>
 #include <camera_metadata_hidden.h>
@@ -390,8 +391,15 @@ int validate_camera_metadata_structure(const camera_metadata_t *metadata,
         return ERROR;
     }
 
-    const metadata_uptrdiff_t entries_end =
-        metadata->entries_start + metadata->entry_capacity;
+    if (metadata->data_count > metadata->data_capacity) {
+        ALOGE("%s: Data count (%" PRIu32 ") should be <= data capacity "
+              "(%" PRIu32 ")",
+              __FUNCTION__, metadata->data_count, metadata->data_capacity);
+        android_errorWriteLog(SN_EVENT_LOG_ID, "30591838");
+        return ERROR;
+    }
+
+    const metadata_uptrdiff_t entries_end = metadata->entries_start + metadata->entry_capacity;
     if (entries_end < metadata->entries_start || // overflow check
         entries_end > metadata->data_start) {
 
@@ -496,6 +504,10 @@ int append_camera_metadata(camera_metadata_t *dst,
         const camera_metadata_t *src) {
     if (dst == NULL || src == NULL ) return ERROR;
 
+    // Check for overflow
+    if (src->entry_count + dst->entry_count < src->entry_count) return ERROR;
+    if (src->data_count + dst->data_count < src->data_count) return ERROR;
+    // Check for space
     if (dst->entry_capacity < src->entry_count + dst->entry_count) return ERROR;
     if (dst->data_capacity < src->data_count + dst->data_count) return ERROR;
 
