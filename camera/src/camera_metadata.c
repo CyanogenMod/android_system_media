@@ -399,7 +399,8 @@ int validate_camera_metadata_structure(const camera_metadata_t *metadata,
         return ERROR;
     }
 
-    const metadata_uptrdiff_t entries_end = metadata->entries_start + metadata->entry_capacity;
+    const metadata_uptrdiff_t entries_end =
+        metadata->entries_start + metadata->entry_capacity;
     if (entries_end < metadata->entries_start || // overflow check
         entries_end > metadata->data_start) {
 
