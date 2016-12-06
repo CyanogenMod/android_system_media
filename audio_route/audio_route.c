@@ -420,13 +420,24 @@ static int path_reset(struct audio_route *ar, struct mixer_path *path)
 static int mixer_enum_string_to_value(struct mixer_ctl *ctl, const char *string)
 {
     unsigned int i;
+    unsigned int num_values = mixer_ctl_get_num_enums(ctl);
+
+    if (string == NULL) {
+        ALOGE("NULL enum value string passed to mixer_enum_string_to_value() for ctl %s",
+              mixer_ctl_get_name(ctl));
+        return 0;
+    }
 
     /* Search the enum strings for a particular one */
-    for (i = 0; i < mixer_ctl_get_num_enums(ctl); i++) {
+    for (i = 0; i < num_values; i++) {
         if (strcmp(mixer_ctl_get_enum_string(ctl, i), string) == 0)
             break;
     }
-
+    if (i == num_values) {
+        ALOGE("unknown enum value string %s for ctl %s",
+              string, mixer_ctl_get_name(ctl));
+        return 0;
+    }
     return i;
 }
 
